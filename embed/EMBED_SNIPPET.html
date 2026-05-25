@@ -41,7 +41,9 @@
     if (e.origin !== EMBED_ORIGIN) return;
     var h = Number(e.data.height);
     if (!isFinite(h) || h <= 0) return;
-    var next = Math.max(MIN_HEIGHT, Math.round(h + 24));
+    // Match content height exactly. Adding padding here would amplify the
+    // height on each round-trip and trigger a runaway resize loop.
+    var next = Math.max(MIN_HEIGHT, Math.round(h));
     if (Math.abs(parseInt(iframe.style.height, 10) - next) > 4) {
       iframe.style.height = next + 'px';
     }
