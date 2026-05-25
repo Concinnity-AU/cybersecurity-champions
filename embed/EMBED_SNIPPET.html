@@ -1,0 +1,50 @@
+<!--
+  Cybersecurity Champions Challenge — Squarespace embed snippet.
+  Paste this whole block into a Squarespace Code Block on the page
+  you want to host the challenge (e.g. /cybersecurity).
+
+  The iframe auto-resizes as users move between screens via
+  postMessage from the embedded app. Sandbox attrs restrict the
+  iframe but still allow links to open in new tabs.
+-->
+<div id="cybersec-challenge" style="width:100%;"></div>
+<script>
+(function () {
+  var EMBED_ORIGIN = 'https://cybersecurity.tims.org.au';
+  var EMBED_URL = EMBED_ORIGIN + '/?embed=1';
+  var INITIAL_HEIGHT = 720;
+  var MIN_HEIGHT = 400;
+
+  var container = document.getElementById('cybersec-challenge');
+  if (!container) return;
+  if (container.getAttribute('data-cybersec-initialised') === '1') return;
+  container.setAttribute('data-cybersec-initialised', '1');
+
+  var iframe = document.createElement('iframe');
+  iframe.src = EMBED_URL;
+  iframe.title = 'Cybersecurity Champions Challenge';
+  iframe.setAttribute('loading', 'lazy');
+  iframe.setAttribute(
+    'sandbox',
+    'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox'
+  );
+  iframe.setAttribute('allow', 'clipboard-write; web-share');
+  iframe.style.cssText =
+    'width:100%;border:0;display:block;height:' +
+    INITIAL_HEIGHT +
+    'px;transition:height .3s ease;';
+  container.appendChild(iframe);
+
+  window.addEventListener('message', function (e) {
+    if (!e.data || typeof e.data !== 'object') return;
+    if (e.data.type !== 'cybersec:resize') return;
+    if (e.origin !== EMBED_ORIGIN) return;
+    var h = Number(e.data.height);
+    if (!isFinite(h) || h <= 0) return;
+    var next = Math.max(MIN_HEIGHT, Math.round(h + 24));
+    if (Math.abs(parseInt(iframe.style.height, 10) - next) > 4) {
+      iframe.style.height = next + 'px';
+    }
+  });
+})();
+</script>

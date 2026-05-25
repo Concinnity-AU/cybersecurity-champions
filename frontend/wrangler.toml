@@ -1,0 +1,23 @@
+name = "cybersecurity-champions-frontend"
+compatibility_date = "2024-11-12"
+compatibility_flags = ["nodejs_compat"]
+# Required for `wrangler pages deploy` to recognise this config as a Pages
+# project and apply the bindings below to the deployment.
+pages_build_output_dir = "./dist"
+
+# Note: Pages Functions don't need a `[[rules]]` block for wasm imports —
+# the Pages build pipeline auto-detects and bundles them.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cybersecurity-champions-db"
+# Replace with the ID printed by `npm run db:create`:
+database_id = "0b5b2b9f-4257-4efb-aacc-202ff79c65d7"
+
+[vars]
+PRIMARY_DOMAIN = "cybersecurity.tims.org.au"
+EMBED_PARENT_DOMAINS = "tims.org.au,www.tims.org.au"
+TURNSTILE_SITE_KEY = "0x4AAAAAADVycawsagNr1h1u"
+
+# Secrets (set with `wrangler pages secret put TURNSTILE_SECRET --project-name=cybersecurity-champions-frontend`):
+#   TURNSTILE_SECRET — Cloudflare Turnstile secret key
