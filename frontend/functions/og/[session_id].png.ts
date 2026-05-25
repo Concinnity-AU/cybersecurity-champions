@@ -39,7 +39,10 @@ export const onRequestGet: PagesFunction<Env, 'session_id'> = async ({ params, e
 
   try {
     const png = await renderOgPng({ ...input, domain: env.PRIMARY_DOMAIN, requestUrl: request.url });
-    return new Response(png, {
+    // Cast: TS 5.7 made Uint8Array generic over its buffer type, but the
+    // ambient Response/BodyInit signature still expects the non-generic
+    // form. Runtime behaviour is identical.
+    return new Response(png as unknown as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': 'image/png',

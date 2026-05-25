@@ -45,8 +45,18 @@ async function loadLogo(requestUrl: string): Promise<string> {
   return logoCache;
 }
 
-let fontsCache: { name: string; data: ArrayBuffer; weight: number; style: 'normal' }[] | null = null;
-async function loadFonts(requestUrl: string) {
+/** Satori accepts only specific numeric font-weight literals. */
+type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
+interface LoadedFont {
+  name: string;
+  data: ArrayBuffer;
+  weight: FontWeight;
+  style: 'normal';
+}
+
+let fontsCache: LoadedFont[] | null = null;
+async function loadFonts(requestUrl: string): Promise<LoadedFont[]> {
   if (fontsCache) return fontsCache;
   // Fonts are bundled in public/fonts/ and served same-origin by Pages.
   // In dev this proxies through wrangler → vite; in prod they're static
@@ -54,18 +64,18 @@ async function loadFonts(requestUrl: string) {
   const base = new URL(requestUrl);
   // Satori parses raw OpenType (TTF/OTF) — not WOFF2, which is compressed
   // and would require a brotli decoder in the Worker bundle.
-  const files: { weight: number; path: string }[] = [
+  const files: { weight: FontWeight; path: string }[] = [
     { weight: 800, path: '/fonts/Manrope-ExtraBold.ttf' },
     { weight: 600, path: '/fonts/Manrope-SemiBold.ttf' },
     { weight: 400, path: '/fonts/Manrope-Regular.ttf' },
   ];
   const loaded = await Promise.all(
-    files.map(async ({ weight, path }) => {
+    files.map(async ({ weight, path }): Promise<LoadedFont> => {
       const url = new URL(path, base.origin).toString();
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Font fetch failed: ${url} → ${res.status}`);
       const data = await res.arrayBuffer();
-      return { name: 'Manrope', data, weight, style: 'normal' as const };
+      return { name: 'Manrope', data, weight, style: 'normal' };
     }),
   );
   fontsCache = loaded;
