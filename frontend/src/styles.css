@@ -948,33 +948,97 @@ html.is-embed .cc-shell {
 .path__cta { margin-top: auto; padding-top: 10px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--tims-purple); font-size: 14px; }
 .path__arrow { width: 16px; height: 16px; }
 
-/* Registration-code chip on the primary path card. */
-.path__token {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255,255,255,.10);
-  border: 1px dashed rgba(255,255,255,.35);
-  padding: 8px 12px;
-  border-radius: 10px;
-  margin-top: 6px;
+/* Registration-code "tap to copy" button on the primary path card. */
+.path__token-instr {
+  margin: 6px 0 -2px;
   font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.92);
 }
-.path__token-label {
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-weight: 800;
-  font-size: 11px;
-  opacity: .85;
+.path__token {
+  /* Reset button defaults */
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  /* Layout */
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(0,0,0,.22);
+  border: 1.5px dashed rgba(255,255,255,.45);
+  padding: 12px 14px;
+  border-radius: 12px;
+  transition: background .2s, border-color .2s, transform .15s;
+  min-height: 52px;
+}
+.path__token:hover,
+.path__token:focus-visible {
+  background: rgba(0,0,0,.30);
+  border-color: var(--tims-gold);
+  outline: none;
+}
+.path__token:active { transform: scale(.99); }
+.path__token.is-copied {
+  background: rgba(46,139,101,.30);
+  border-color: var(--accent-green);
+  border-style: solid;
 }
 .path__token-value {
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--tims-gold);
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: -.005em;
+  word-break: break-all;
 }
+.path__token.is-copied .path__token-value { color: #fff; }
+.path__token-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.85);
+  flex-shrink: 0;
+}
+.path__token.is-copied .path__token-action { color: #fff; }
+.path__token-icon { width: 14px; height: 14px; }
+
+/* Primary path CTA — explicit button replacing the previous anchor-as-card.
+   Workshop card (path--secondary) still uses the inline .path__cta. */
+.path__cta-btn {
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: -.005em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--tims-gold);
+  color: var(--tims-purple-deep);
+  padding: 14px 22px;
+  min-height: 52px;
+  font-size: 15px;
+  margin-top: 8px;
+  align-self: stretch;
+  transition: transform .15s, box-shadow .2s, background .2s;
+  box-shadow: var(--sh-gold);
+}
+.path__cta-btn:hover { background: #ffd23c; transform: translateY(-1px); }
+.path__cta-btn:active { transform: translateY(1px); }
+.path__cta-btn .path__arrow { width: 16px; height: 16px; }
+
+/* Primary path is no longer a clickable card — kill the hover lift so the
+   buttons inside it are the focal interactive elements. */
+.path--primary { cursor: default; }
+.path--primary:hover { transform: none; box-shadow: none; border-color: var(--tims-purple); }
 .path--primary { background: var(--tims-purple); color: #fff; border-color: var(--tims-purple); }
 .path--primary .path__num,
 .path--primary .path__body { color: rgba(255,255,255,.82); }

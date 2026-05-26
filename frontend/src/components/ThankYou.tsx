@@ -82,7 +82,27 @@ export const ThankYou = ({
 }: ThankYouProps) => {
   const tier = tierFor(score);
   const [copied, setCopied] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
   const tribalToken = tribalHabitsTokenFromUrl(config.tribalHabitsEnrolUrl);
+
+  const copyToken = async (): Promise<boolean> => {
+    if (!tribalToken) return false;
+    try {
+      await navigator.clipboard.writeText(tribalToken);
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2500);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const openTribalHabits = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Copy first so it's already on the clipboard by the time the new tab loads.
+    await copyToken();
+    window.open(config.tribalHabitsEnrolUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const trackedShare = (platform: SharePlatform, action?: () => void) => () => {
     postShare({ session_id: sessionId, platform });
@@ -180,28 +200,58 @@ export const ThankYou = ({
       <div className="thanks__cta-block">
         <h3 className="thanks__cta-title">Keep going — both FREE</h3>
         <div className="paths">
-          <a
-            className="path path--primary"
-            href={config.tribalHabitsEnrolUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <div className="path path--primary">
             <div className="path__num">01</div>
             <h3 className="path__title">Start the free e-learning modules</h3>
             <p className="path__body">
               Four short modules on Tribal Habits. Go at your own pace, on any device. 4–8 hours
               total — start whenever suits.
             </p>
+
             {tribalToken && (
-              <div className="path__token" aria-label={`Registration code: ${tribalToken}`}>
-                <span className="path__token-label">Code on next page</span>
-                <code className="path__token-value">{tribalToken}</code>
-              </div>
+              <>
+                <p className="path__token-instr">
+                  When you register, Tribal Habits will ask for a code. Use this one:
+                </p>
+                <button
+                  type="button"
+                  className={`path__token ${tokenCopied ? 'is-copied' : ''}`}
+                  onClick={copyToken}
+                  aria-label={
+                    tokenCopied
+                      ? `Registration code ${tribalToken} copied to clipboard`
+                      : `Copy registration code ${tribalToken} to clipboard`
+                  }
+                >
+                  <code className="path__token-value">{tribalToken}</code>
+                  <span className="path__token-action" aria-hidden="true">
+                    {tokenCopied ? (
+                      <>
+                        <CheckIcon className="path__token-icon" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon className="path__token-icon" />
+                        Tap to copy
+                      </>
+                    )}
+                  </span>
+                </button>
+              </>
             )}
-            <span className="path__cta">
-              Begin online <ArrowIcon className="path__arrow" />
-            </span>
-          </a>
+
+            <button
+              type="button"
+              className="path__cta-btn"
+              onClick={openTribalHabits}
+            >
+              {tribalToken
+                ? 'Copy code & open registration'
+                : 'Open registration'}
+              <ArrowIcon className="path__arrow" />
+            </button>
+          </div>
           <a
             className="path path--secondary"
             href={config.workshopEnquiryUrl}
