@@ -947,6 +947,34 @@ html.is-embed .cc-shell {
 .path__body { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); line-height: 1.45; }
 .path__cta { margin-top: auto; padding-top: 10px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--tims-purple); font-size: 14px; }
 .path__arrow { width: 16px; height: 16px; }
+
+/* Registration-code chip on the primary path card. */
+.path__token {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,.10);
+  border: 1px dashed rgba(255,255,255,.35);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.path__token-label {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 800;
+  font-size: 11px;
+  opacity: .85;
+}
+.path__token-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--tims-gold);
+  font-size: 14px;
+  letter-spacing: -.005em;
+}
 .path--primary { background: var(--tims-purple); color: #fff; border-color: var(--tims-purple); }
 .path--primary .path__num,
 .path--primary .path__body { color: rgba(255,255,255,.82); }

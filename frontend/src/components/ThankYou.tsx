@@ -60,6 +60,17 @@ interface ThankYouProps {
   onRestart: () => void;
 }
 
+/** Extract the `?token=` value from the Tribal Habits URL so we can both
+ *  attempt URL-based auto-fill AND show the code visibly on the page —
+ *  one config value, both behaviours. Returns null if no token in URL. */
+function tribalHabitsTokenFromUrl(url: string): string | null {
+  try {
+    return new URL(url).searchParams.get('token');
+  } catch {
+    return null;
+  }
+}
+
 export const ThankYou = ({
   name,
   score,
@@ -71,6 +82,7 @@ export const ThankYou = ({
 }: ThankYouProps) => {
   const tier = tierFor(score);
   const [copied, setCopied] = useState(false);
+  const tribalToken = tribalHabitsTokenFromUrl(config.tribalHabitsEnrolUrl);
 
   const trackedShare = (platform: SharePlatform, action?: () => void) => () => {
     postShare({ session_id: sessionId, platform });
@@ -180,6 +192,12 @@ export const ThankYou = ({
               Four short modules on Tribal Habits. Go at your own pace, on any device. 4–8 hours
               total — start whenever suits.
             </p>
+            {tribalToken && (
+              <div className="path__token" aria-label={`Registration code: ${tribalToken}`}>
+                <span className="path__token-label">Code on next page</span>
+                <code className="path__token-value">{tribalToken}</code>
+              </div>
+            )}
             <span className="path__cta">
               Begin online <ArrowIcon className="path__arrow" />
             </span>

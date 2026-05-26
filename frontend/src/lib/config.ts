@@ -20,7 +20,7 @@ export const config: AppConfig = {
   tribalHabitsEnrolUrl:
     window.__CONFIG__?.tribalHabitsEnrolUrl ??
     env.VITE_TRIBAL_HABITS_ENROL_URL ??
-    'https://tims.org.au/cybersecurity',
+    'https://tims.tribalhabits.com/accounts/register?token=champions-challenge',
   workshopEnquiryUrl:
     window.__CONFIG__?.workshopEnquiryUrl ??
     env.VITE_WORKSHOP_ENQUIRY_URL ??
