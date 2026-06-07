@@ -60,12 +60,15 @@ interface ThankYouProps {
   onRestart: () => void;
 }
 
-/** Extract the `?token=` value from the Tribal Habits URL so we can both
+/** Extract the registration code from the Tribal Habits URL so we can both
  *  attempt URL-based auto-fill AND show the code visibly on the page —
- *  one config value, both behaviours. Returns null if no token in URL. */
+ *  one config value, both behaviours. Tribal Habits' param is
+ *  `registration_token`; we also accept `token` for resilience against any
+ *  future rename. Returns null if no code is present in the URL. */
 function tribalHabitsTokenFromUrl(url: string): string | null {
   try {
-    return new URL(url).searchParams.get('token');
+    const params = new URL(url).searchParams;
+    return params.get('registration_token') ?? params.get('token');
   } catch {
     return null;
   }

@@ -54,9 +54,10 @@ export const onRequestGet: PagesFunction<Env, 'session_id'> = async ({ params, e
   const title = row
     ? `${displayName} scored ${score}/${total} on the Cybersecurity Champions Challenge`
     : 'Cybersecurity Champions Challenge';
+  // Keep descriptions ≥100 chars — LinkedIn's Post Inspector warns below that.
   const description = row
-    ? `${displayName} is a ${tierLabel}. Can you do better? Take the free 90-second challenge.`
-    : 'Take the free 90-second challenge based on real scams reported to Australian authorities.';
+    ? `${displayName} is a ${tierLabel} on the TIMS Cybersecurity Champions Challenge! Could you spot the scams? Take the free 90-second quiz, based on real scams reported to Scamwatch, the ASD and the NASC.`
+    : 'Could you spot the scams? Take the free 90-second TIMS Cybersecurity Champions Challenge, based on real scams reported to Scamwatch, the ASD and the NASC. No sign-up needed to play.';
 
   const html = `<!DOCTYPE html>
 <html lang="en">
