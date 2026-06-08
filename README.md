@@ -6,6 +6,22 @@ A 90-second, mobile-first challenge with ten rapid scenarios drawn from real sca
 
 > Full backend brief (architecture, acceptance criteria, scope): see the design handoff under `_handoff/`.
 
+## Documentation
+
+This README is the quick overview and first-run checklist. For deeper, task-oriented
+maintainer documentation — how-to guides, API/schema/config reference, and
+architecture/security/privacy explanations — see **[`docs/`](docs/README.md)**.
+
+- New here? Start with [Local development](docs/tutorials/local-development.md)
+  then [Production setup](docs/tutorials/production-setup.md).
+- Common tasks: [manage challenges](docs/how-to/manage-challenges.md),
+  [export leads](docs/how-to/export-and-manage-leads.md),
+  [deploy](docs/how-to/deploy.md), [manage secrets](docs/how-to/manage-secrets.md).
+- Reference: [API](docs/reference/api.md) ·
+  [database schema](docs/reference/database-schema.md) ·
+  [configuration](docs/reference/configuration.md).
+- Stuck? [Troubleshooting](docs/troubleshooting.md).
+
 ## Hosting model
 
 - **Cloudflare infrastructure (Pages + Functions + D1 + Turnstile)** lives in the **Concinnity** Cloudflare account.
