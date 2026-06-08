@@ -27,6 +27,10 @@ Thumbs.db
 !.vscode/settings.json
 .idea/
 
+# Claude Code — personal/local settings (shared .claude/settings.json,
+# if ever added, is intentionally NOT ignored)
+.claude/settings.local.json
+
 # Logs
 npm-debug.log*
 pnpm-debug.log*
