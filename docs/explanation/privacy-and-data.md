@@ -9,7 +9,7 @@ The system separates **anonymous engagement data** from **personal data**:
 
 | | `completions` (+ `shares`) | `leads` |
 |---|---|---|
-| Contains PII? | No | Yes (name, email, optional phone/postcode) |
+| Contains PII? | No | Yes (name, email, optional phone) |
 | Written by | `/api/complete`, `/api/share` | `/api/lead` |
 | Requires consent? | No | Yes (`consent_program`) |
 | Requires Turnstile? | No | Yes |
@@ -40,10 +40,16 @@ consented list of people who actually want follow-up.
 
 - `consent_program` — **required true** to submit at all. This is consent to be
   contacted about the Cybersecurity Champions program.
-- `consent_marketing` — **separate, defaults false**. Broader marketing consent
-  is opt-in and tracked independently, so you can export "program only" vs
-  "marketing OK" segments (see
-  [How-to: Export and manage leads](../how-to/export-and-manage-leads.md)).
+- `consent_marketing` — **separate, defaults false**. The schema and API support
+  a distinct marketing opt-in, but the **current launch form does not expose a
+  marketing checkbox** — every lead is submitted with `consent_marketing = false`.
+  The column exists so a marketing opt-in can be added later (a second checkbox on
+  the form) without a schema change. Until then, the "marketing-consented" segment
+  is always empty.
+
+> **Postcode:** the `leads` table and the `/api/lead` schema also retain an
+> optional `postcode` column, but the current form does not collect it either. It
+> can be re-added to the form later without a schema change.
 
 ## Data residency & retention
 
@@ -72,4 +78,3 @@ The quiz content references real scams reported to **Scamwatch (ACCC)**, the
 **NASC**, the **ASD**, **Services Australia**, and **IDCARE**. Per-challenge
 provenance can be stored in `challenges.source_note`, and the app surfaces an
 in-app Sources list. This keeps the educational content credible and traceable.
-</content>

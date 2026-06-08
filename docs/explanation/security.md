@@ -104,4 +104,3 @@ No rate limiting beyond Turnstile, no WAF rules, no audit logging. At expected
 community-program volume these would be over-engineering. If the program scales
 or starts attracting abuse, Cloudflare's dashboard offers rate-limiting and bot
 controls that can be layered on without code changes.
-</content>

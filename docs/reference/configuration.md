@@ -78,9 +78,10 @@ so lead submission works locally without a real account.
 ## 4. Frontend build vars — `frontend/.env.local`
 
 Copy from `.env.example`. Gitignored. These are **Vite** vars (prefix
-`VITE_`) baked into the SPA at `npm run build`. At runtime in production the SPA
-reads `window.__CONFIG__` first and falls back to these baked values (see
-`frontend/src/lib/config.ts`).
+`VITE_`) baked into the SPA at `npm run build`. These baked values are what
+production actually uses. (`config.ts` also checks an optional `window.__CONFIG__`
+override first, but nothing populates it today — it's a forward-looking hook. See
+`frontend/src/lib/config.ts`.)
 
 | Var | Default / example | Purpose |
 |---|---|---|
@@ -122,4 +123,3 @@ passing ones:
 
 - Site key (passes any token): `1x00000000000000000000AA`
 - Secret key (passes any token): `1x0000000000000000000000000000000AA`
-</content>

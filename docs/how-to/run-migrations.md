@@ -77,4 +77,3 @@ npx wrangler d1 execute cybersecurity-champions-db --remote --command="SELECT na
 # spot-check row counts
 npx wrangler d1 execute cybersecurity-champions-db --remote --command="SELECT count(*) FROM challenges;"
 ```
-</content>

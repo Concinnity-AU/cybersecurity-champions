@@ -25,6 +25,12 @@ Drop `--json` for a readable table in the terminal.
 
 ## Export only marketing-consented leads
 
+> **Note:** the current launch form does **not** collect marketing consent —
+> every lead is stored with `consent_marketing = 0`, so this query returns
+> **nothing** today. It becomes useful only once a marketing opt-in checkbox is
+> added to the form (see
+> [Explanation: Privacy and data](../explanation/privacy-and-data.md#consent-model)).
+
 ```sh
 npx wrangler d1 execute cybersecurity-champions-db --remote \
   --command="SELECT first_name, email, phone FROM leads WHERE consent_marketing=1 ORDER BY created_at DESC;" \
@@ -87,4 +93,3 @@ npx wrangler d1 execute cybersecurity-champions-db --remote \
 
 The completion row stays (it's anonymous once unlinked), so your analytics
 aren't skewed.
-</content>

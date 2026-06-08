@@ -90,10 +90,10 @@ If `/api/complete` fails, the SPA still shows a result screen with a fallback
 tier rather than blocking the user on an analytics call — UX is prioritised over
 perfect telemetry.
 
-## Runtime config injection
+## Runtime config
 
-The SPA reads config from `window.__CONFIG__` (injected by Pages at runtime in
-production) and falls back to Vite build-time `VITE_*` vars
+The SPA reads config from `window.__CONFIG__` (an optional runtime-override hook,
+**not currently populated** in production) and otherwise uses the build-time `VITE_*` vars
 (`frontend/src/lib/config.ts`). This lets the same build behave correctly across
 environments without rebuilding. See
 [Reference: Configuration](../reference/configuration.md).
@@ -125,4 +125,3 @@ that point social crawlers at that image.
   provider; the `cybersecurity` subdomain is a CNAME to the Pages project. This
   cross-DNS split is the fiddliest part of setup — see
   [Tutorial: Production setup](../tutorials/production-setup.md).
-</content>

@@ -136,4 +136,3 @@ npx wrangler d1 execute cybersecurity-champions-db --remote \
 
 See [How-to: Export and manage leads](../how-to/export-and-manage-leads.md) and
 [How-to: Manage challenges](../how-to/manage-challenges.md) for task recipes.
-</content>

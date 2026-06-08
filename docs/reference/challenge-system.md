@@ -93,4 +93,3 @@ it can and tops up from the rest of the pool rather than failing.
 
 See [Explanation: Architecture](../explanation/architecture.md) for the request
 diagram and [Reference: API](api.md) for endpoint details.
-</content>

@@ -74,4 +74,3 @@ In the Cloudflare dashboard → Workers & Pages → `cybersecurity-champions-fro
 → Deployments, you can promote a previous deployment to roll back the SPA +
 Functions quickly. Note this does **not** roll back database changes — handle
 those separately via a corrective migration.
-</content>

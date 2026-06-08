@@ -96,4 +96,3 @@ Check you still have enough of each type to satisfy the selection distribution
 (4 `spot_it`, 2 `pick_stronger`, 3 `scenario`, 1 `real_ai` for a 10-question
 quiz). The selector degrades gracefully if a bucket is short, but you'll get a
 less balanced quiz.
-</content>

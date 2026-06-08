@@ -59,4 +59,3 @@ where pasting the full snippet isn't ideal. For Squarespace, prefer
 postMessage. The snippet only accepts messages from
 `https://cybersecurity.tims.org.au`; make sure the iframe `src` matches that
 origin exactly. More in [Troubleshooting](../troubleshooting.md).
-</content>
