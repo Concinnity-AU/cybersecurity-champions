@@ -4,7 +4,7 @@ Interactive lead-magnet for the Toowoomba International Multicultural Society (T
 
 A 90-second, mobile-first challenge with ten rapid scenarios drawn from real scams reported to Australian authorities. Designed to be embedded into the Squarespace site at `tims.org.au/cybersecurity` as well as hosted standalone at `cybersecurity.tims.org.au`.
 
-> Full backend brief (architecture, acceptance criteria, scope): see the design handoff under `_handoff/`.
+> Deeper architecture, security, and operational docs live in [`docs/`](docs/README.md). The original Claude Design handoff (prototype, brand assets, content pack) is preserved under `_handoff/` for reference.
 
 ## Documentation
 
@@ -26,7 +26,7 @@ architecture/security/privacy explanations — see **[`docs/`](docs/README.md)**
 
 - **Cloudflare infrastructure (Pages + Functions + D1 + Turnstile)** lives in the **Concinnity** Cloudflare account.
 - **GitHub repo** lives in the **Concinnity** org and auto-deploys on push to `main`.
-- **Domain `tims.org.au`** is managed by TIMS on their own (non-Cloudflare) DNS provider; the `cybersecurity` subdomain is wired to the Concinnity Pages project via a CNAME (see Phase 2.6 below).
+- **Domain `tims.org.au`** is managed by TIMS on their own (non-Cloudflare) DNS provider; the `cybersecurity` subdomain is wired to the Concinnity Pages project via a CNAME (see step 6 under "One-time Cloudflare setup" below).
 
 ## Architecture
 
@@ -82,7 +82,7 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
 │   │   └── _shared/                 # cross-function helpers (db, tiers, cors, og, ...)
 │   ├── index.html
 │   ├── vite.config.ts
-│   ├── wrangler.toml          # D1 binding, env vars, wasm rule
+│   ├── wrangler.toml          # D1 binding, env vars
 │   ├── .env.example
 │   ├── .dev.vars.example
 │   └── package.json

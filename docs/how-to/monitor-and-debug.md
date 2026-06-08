@@ -79,4 +79,3 @@ run `npm run typecheck` locally to reproduce.
 
 For specific symptoms (no challenges, Turnstile failures, OG 500s, iframe not
 resizing, secret not taking effect), see [Troubleshooting](../troubleshooting.md).
-</content>

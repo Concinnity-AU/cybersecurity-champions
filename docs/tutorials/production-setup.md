@@ -140,4 +140,3 @@ The custom domain card detects the CNAME and turns green within a few minutes
   challenge on the Squarespace page.
 - [Reference: Configuration](../reference/configuration.md) — every env var and
   secret in one place.
-</content>

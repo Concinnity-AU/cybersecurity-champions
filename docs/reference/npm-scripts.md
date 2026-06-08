@@ -48,4 +48,3 @@ npx wrangler d1 execute cybersecurity-champions-db --local --command="SELECT cou
 ```
 
 See [How-to: Run migrations](../how-to/run-migrations.md).
-</content>

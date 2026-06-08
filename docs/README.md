@@ -77,5 +77,3 @@ Understanding-oriented background.
 
 - **[Troubleshooting](troubleshooting.md)** — symptoms, causes, and fixes for
   common problems.
-</content>
-</invoke>

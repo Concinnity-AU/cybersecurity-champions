@@ -161,4 +161,3 @@ yet (propagation/TTL), or the record is wrong.
 # check what the subdomain resolves to
 nslookup cybersecurity.tims.org.au
 ```
-</content>

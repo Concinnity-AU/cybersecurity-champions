@@ -222,4 +222,3 @@ Source: `functions/og/[session_id].png.ts` + `functions/_shared/og-image.ts`.
 The SPA calls these endpoints through `frontend/src/lib/api.ts`, which centralises
 fetch logic and error handling. `postShare` is fire-and-forget; the others throw
 `Error("HTTP <status>: <detail>")` on non-2xx so the UI can show an error state.
-</content>

@@ -64,4 +64,3 @@ npx wrangler pages secret delete TURNSTILE_SECRET --project-name=cybersecurity-c
 Local dev uses `frontend/.dev.vars` (gitignored), which ships the always-passing
 Turnstile **test** secret — you don't need the real secret to develop. See
 [Reference: Configuration](../reference/configuration.md).
-</content>

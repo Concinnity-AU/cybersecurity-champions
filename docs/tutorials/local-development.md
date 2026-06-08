@@ -115,4 +115,3 @@ you commit.
   fit together.
 - [Reference: npm scripts](../reference/npm-scripts.md) — every command
   available.
-</content>
