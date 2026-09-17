@@ -25,7 +25,7 @@ created and linked by `session_id`.
 This split means you get aggregate engagement analytics (how many started and
 finished, how they scored, which campaigns brought them, who clicked through to
 the course) without tying it to people, and a separate, consented list of people
-who actually want updates.
+who chose to be recorded as program participants.
 
 ## What is NOT collected
 
@@ -48,16 +48,15 @@ who actually want updates.
 `/api/lead` enforces:
 
 - `consent_program` — **required true** to submit at all. This is consent to be
-  contacted about the Cybersecurity Champions program.
+  recorded as a participant in the Cybersecurity Champions program.
 - `consent_marketing` — **separate in the API, defaults false**.
 
-The form is framed as an optional "updates and resources" sign-up with a
-**single checkbox** whose wording covers both: emails with cybersecurity updates
-and resources, and news about the free program. Ticking it (required to submit)
-sends `consent_program = true` **and** `consent_marketing = true`, so every lead
-submitted from the current form has both set. Leads captured by the earlier form
-have `consent_marketing = 0`. The columns stay separate so the two consents can
-be split into two checkboxes later without a schema change.
+The form is an optional participant record: name and email only, with a
+**single checkbox** consenting to TIMS recording the person as a program
+participant. It sends `consent_program = true` and `consent_marketing = false`.
+There are no newsletters or marketing emails. Leads submitted between the
+funnel release and this change may have `consent_marketing = 1` from the
+earlier "updates and resources" wording; that consent is not acted on.
 
 > **Phone and postcode:** the `leads` table and the `/api/lead` schema still
 > accept optional `phone` and `postcode`, but the current form collects neither.

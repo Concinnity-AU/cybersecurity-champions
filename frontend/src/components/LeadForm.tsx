@@ -1,5 +1,6 @@
-/* Optional "updates and resources" sign-up, shown below the course CTA.
-   Never gates the score or the course — a lead is its own measure. */
+/* Optional participant record (name + email), shown below the course CTA.
+   Never gates the score or the course — a lead is its own measure. No
+   newsletters or marketing: consent_marketing is always false. */
 
 import { useState } from 'react';
 import { ArrowIcon, CheckIcon } from './Icon';
@@ -42,7 +43,7 @@ export const LeadForm = ({ sessionId }: { sessionId: string }) => {
     const next: Record<string, string> = {};
     if (!form.firstName.trim()) next.firstName = 'Please share your first name';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'A valid email please';
-    if (!form.consent) next.consent = 'Please tick the box so we can email you';
+    if (!form.consent) next.consent = 'Please tick the box to continue';
     setErr(next);
     if (Object.keys(next).length > 0) return;
 
@@ -58,10 +59,9 @@ export const LeadForm = ({ sessionId }: { sessionId: string }) => {
         session_id: sessionId,
         first_name: firstName,
         email: form.email.trim(),
-        // The single checkbox covers both: contact about the program, and
-        // updates/resources (its wording says so).
+        // The checkbox consents to being recorded as a program participant only.
         consent_program: true,
-        consent_marketing: true,
+        consent_marketing: false,
         turnstile_token: token,
         ...getAttribution(),
       });

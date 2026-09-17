@@ -1,7 +1,7 @@
 # How-to: Export and manage leads
 
-Leads are captured by `POST /api/lead` (the optional "updates and resources"
-sign-up on the result screen) into the `leads` table. Each lead stores its
+Leads are captured by `POST /api/lead` (the optional participant form —
+name and email — on the result screen) into the `leads` table. Each lead stores its
 `session_id` and campaign attribution, and is linked from its completion via
 `lead_id`.
 
@@ -32,18 +32,9 @@ Drop `--json` for a readable table in the terminal.
 > `leads-export.json` contains PII. Keep it out of the repo (it's not gitignored
 > by default — don't commit it), store it securely, and delete it when done.
 
-## Export only marketing-consented leads
-
-> **Note:** the current form's single checkbox covers updates and resources, so
-> every lead it submits has `consent_marketing = 1`. Leads captured by the
-> earlier launch form have `consent_marketing = 0` and are excluded here (see
+> Leads are a participant record only — there are no newsletters or marketing
+> emails, so don't use this list for mailouts (see
 > [Explanation: Privacy and data](../explanation/privacy-and-data.md#consent-model)).
-
-```sh
-npx wrangler d1 execute cybersecurity-champions-db --remote \
-  --command="SELECT first_name, email, created_at FROM leads WHERE consent_marketing=1 ORDER BY created_at DESC;" \
-  --json > marketing-leads.json
-```
 
 ## Leads with their quiz result
 
@@ -76,7 +67,7 @@ npx wrangler d1 execute cybersecurity-champions-db --remote \
 npx wrangler d1 execute cybersecurity-champions-db --remote \
   --command="SELECT platform, count(*) FROM shares GROUP BY platform ORDER BY 2 DESC;"
 
-# completions that also signed up for updates
+# completions that also left their details
 npx wrangler d1 execute cybersecurity-champions-db --remote \
   --command="SELECT
                count(*) AS completions,

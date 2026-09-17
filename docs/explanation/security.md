@@ -87,8 +87,8 @@ binds** (`.bind(...)`), so there's no string-interpolated SQL.
 ## Consent gating
 
 `/api/lead` rejects (`400`) unless `consent_program` is `true`. Marketing consent
-is a separate boolean defaulting to `false` (the current form sends `true` for
-both from its single checkbox). See
+is a separate boolean defaulting to `false`; the current form always sends
+`false`. See
 [Explanation: Privacy and data](privacy-and-data.md).
 
 ## Secrets handling

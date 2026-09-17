@@ -1,5 +1,5 @@
 /* Result screen — score first, free course as the primary CTA, then an
-   optional updates sign-up. Nothing sits between finishing the Challenge
+   optional participant sign-up (name + email). Nothing sits between finishing the Challenge
    and the course. */
 
 import { useState } from 'react';

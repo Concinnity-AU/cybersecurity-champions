@@ -55,14 +55,14 @@ export const STRINGS = {
     courseCta: 'Start the free course',
     courseCtaWithCode: 'Copy code & start the free course',
     leadKicker: 'Optional',
-    leadTitle: 'Want cybersecurity updates and resources?',
+    leadTitle: 'Let TIMS know you took part',
     leadBody:
-      'Leave your details and TIMS will email you practical scam alerts, tips and news about the free program.',
+      'Add your name and email so TIMS can record you as a participant in the Cybersecurity Champions program.',
     leadConsent:
-      "I'd like TIMS to email me cybersecurity updates, resources and news about the free Cybersecurity Champions program.",
-    leadSubmit: 'Send me updates',
-    leadFine: "We'll never share your details. You can opt out any time.",
-    leadDone: (name: string) => `Thanks, ${name} — you're on the list.`,
+      'I agree to TIMS recording my name and email as a participant in the Cybersecurity Champions program.',
+    leadSubmit: 'Record my participation',
+    leadFine: 'Only used to record your participation. No newsletters or marketing emails.',
+    leadDone: (name: string) => `Thanks, ${name} — you're recorded as a participant.`,
     workshop: 'Prefer in person? Ask about workshops',
   },
   sourcesIntro:
