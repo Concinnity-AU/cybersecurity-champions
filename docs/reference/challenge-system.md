@@ -91,7 +91,7 @@ it can and tops up from the rest of the pool rather than failing.
    share/OG URLs. The result screen shows the score immediately.
 5. Clicking the free-course button (or the workshops link) fires
    `POST /api/event`.
-6. Optionally, the user signs up for updates → `POST /api/lead` (Turnstile
+6. Optionally, the user leaves their name and email → `POST /api/lead` (Turnstile
    verified) → stores the lead with its session and attribution, and links it
    to the completion.
 7. Sharing fires `POST /api/share` per platform.

@@ -79,7 +79,7 @@ up by wrangler automatically.
 - `http://localhost:8788/api/health` → `{"ok":true}`.
 - Click **Start** → ten challenges load (this confirms D1 + the seed worked).
 - Finish the challenge → the result screen shows your score straight away, with
-  the free-course button and the optional updates sign-up below it.
+  the free-course button and the optional participant form below it.
 
 ### Test campaign attribution
 

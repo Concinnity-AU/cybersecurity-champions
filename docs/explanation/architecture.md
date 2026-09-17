@@ -23,7 +23,7 @@ Everything — the static React SPA **and** the API / share / OG routes — is a
 │      • /api/start       → record challenge start + attribution      │
 │      • /api/complete    → record completion, return share/og URLs   │
 │      • /api/event       → record course CTA / workshop click        │
-│      • /api/lead        → Turnstile-verified updates sign-up        │
+│      • /api/lead        → Turnstile-verified participant form       │
 │      • /api/share       → record share event                        │
 │      • /r/:session_id   → server-rendered share landing + OG meta   │
 │      • /og/:session.png → dynamic 1200×630 PNG (satori + resvg)     │
@@ -88,7 +88,7 @@ welcome → loading → challenge ⇄ (feedback) → submitting → result
 The result screen (`components/Result.tsx`) shows the score, tier and breakdown
 **immediately** — nothing is gated behind a form. Below the score it shows, in
 order: the primary call to action (the free Tribal Habits course, with the
-registration code to copy), the optional updates sign-up
+registration code to copy), the optional participant form
 (`components/LeadForm.tsx`), share buttons, and a small "Ask about workshops"
 link. Score-based bridge copy lives in `lib/strings.ts` (`STRINGS.result`).
 

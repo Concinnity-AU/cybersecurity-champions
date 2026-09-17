@@ -75,7 +75,7 @@ verification.
 | `postcode` | TEXT | optional (4-digit AU); not collected by the current form |
 | `language` | TEXT | default `en` (currently always `en` on insert) |
 | `consent_program` | INTEGER | required; stored 1/0 |
-| `consent_marketing` | INTEGER | default 0; the current form stores 1 |
+| `consent_marketing` | INTEGER | default 0; the current form stores 0 |
 | `utm_source` / `utm_medium` / `utm_campaign` | TEXT | optional attribution; lower-cased |
 | `utm_content` | TEXT | optional; creative ID, stored verbatim. Added in `0003` |
 | `referrer` | TEXT | optional; referring hostname only. Added in `0003` |

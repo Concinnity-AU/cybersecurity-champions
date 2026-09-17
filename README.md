@@ -46,7 +46,7 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
 │      • /api/start       → record challenge start + attribution     │
 │      • /api/complete    → record completion, return share/og URLs  │
 │      • /api/event       → record course CTA / workshop click       │
-│      • /api/lead        → Turnstile-verified updates sign-up       │
+│      • /api/lead        → Turnstile-verified participant form      │
 │      • /api/share       → record share event                       │
 │      • /r/:session_id   → server-rendered share landing + OG meta  │
 │      • /og/:session.png → dynamic 1200×630 PNG via satori + resvg  │
@@ -308,7 +308,7 @@ npx wrangler pages deployment tail --project-name=cybersecurity-champions-fronte
 
 ## Funnel and attribution
 
-The result screen shows the score straight away — nothing is gated behind the form. Its primary call to action is the free Tribal Habits course; the updates sign-up (lead form) is optional and sits below it. Each stage is recorded against the `session_id` issued by `/api/challenges`:
+The result screen shows the score straight away — nothing is gated behind the form. Its primary call to action is the free Tribal Habits course; the participant form (name and email) is optional and sits below it. Each stage is recorded against the `session_id` issued by `/api/challenges`:
 
 | Stage | Recorded by | Table |
 |---|---|---|
@@ -316,7 +316,7 @@ The result screen shows the score straight away — nothing is gated behind the 
 | Completed | `POST /api/complete` | `completions` |
 | Course CTA click | `POST /api/event` (`course_cta_click`) | `events` |
 | Workshop link click | `POST /api/event` (`workshop_click`) | `events` |
-| Signed up for updates | `POST /api/lead` — a separate measure, not a funnel gate | `leads` |
+| Left name + email | `POST /api/lead` — a separate measure, not a funnel gate | `leads` |
 
 Everything joins on `session_id`, so every stage can be broken down by `utm_source` / `utm_medium` / `utm_campaign` / `utm_content`. A retake is a new session. Course enrolment happens on Tribal Habits and isn't visible to us — the course CTA click is the last step we can measure.
 

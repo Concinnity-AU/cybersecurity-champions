@@ -184,7 +184,7 @@ Source: `functions/api/event.ts`.
 
 ## `POST /api/lead`
 
-Captures the optional "updates and resources" sign-up (PII), stores it with its
+Captures the optional participant record — name and email (PII), stores it with its
 `session_id` and attribution, and links it to the completion (if any). A lead is
 a separate measure from a completion, not a gate — the score is shown before the
 form. This is the **only** endpoint that requires Turnstile verification.
@@ -199,7 +199,7 @@ form. This is the **only** endpoint that requires Turnstile verification.
 | `phone` | string | optional; `^[+0-9\s()-]{6,}$`, ≤40; empty string allowed. Not sent by the current form. |
 | `postcode` | string | optional; `^\d{4}$` (4-digit AU); empty allowed. Not sent by the current form. |
 | `consent_program` | boolean | **must be `true`** |
-| `consent_marketing` | boolean | default `false`. The current form sends `true` (its single checkbox covers updates and resources). |
+| `consent_marketing` | boolean | default `false`. The current form always sends `false` (no newsletters or marketing). |
 | `turnstile_token` | string | required, ≥1 char |
 | `utm_source` / `utm_medium` / `utm_campaign` / `utm_content` / `referrer` | string\|null | optional; same rules as [`/api/start`](#post-apistart) |
 
