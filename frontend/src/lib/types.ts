@@ -121,6 +121,8 @@ export interface Attribution {
   utm_content: string | null;
   /** Referring hostname only. */
   referrer: string | null;
+  /** Session whose participant share link brought this visitor in. */
+  shared_by: string | null;
 }
 
 export interface StartPayload extends Attribution {
@@ -151,7 +153,8 @@ export interface LeadResponse {
   lead_id: number;
 }
 
-export type SharePlatform = 'facebook' | 'whatsapp' | 'copy' | 'native' | 'twitter';
+/** Keep in step with SHARE_PLATFORMS in functions/_shared/share.ts. */
+export type SharePlatform = 'facebook' | 'whatsapp' | 'linkedin' | 'native' | 'copy' | 'twitter';
 
 export interface SharePayload {
   session_id: string;

@@ -11,8 +11,28 @@ Existing files:
 | `0001_initial.sql` | Schema: all tables and indexes. |
 | `0002_seed_challenges.sql` | Seed: challenges + `en` translations. |
 | `0003_attribution_and_funnel.sql` | Adds `sessions` and `events` tables; adds `session_id`, `utm_content`, `referrer` to `leads`; new indexes. **Apply once** — its `ALTER TABLE ADD COLUMN` statements fail if re-run. |
+| `0004_share_referrals.sql` | Adds `shared_by` to `sessions` (participant share referrals) plus an index. **Apply once.** |
 
 All commands run from `frontend/`.
+
+## Apply `0004` to production (existing database)
+
+The share-referral code writes `sessions.shared_by`. Apply `0004` **once**, and
+**before** deploying the quiz code that depends on it:
+
+```sh
+# 1. local — then open a /r/<session_id>?via=whatsapp link, start the challenge,
+#    and check the new sessions row has shared_by set
+npx wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0004_share_referrals.sql
+
+# 2. remote (production) — before pushing the quiz code to main
+npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0004_share_referrals.sql
+```
+
+If the quiz is deployed without it, every `/api/start` fails (fire-and-forget,
+so nobody notices, but **no starts are recorded**). The migration is additive and
+safe to apply while the current quiz is live. Check it with
+`SELECT name FROM pragma_table_info('sessions');`: `shared_by` should be listed.
 
 ## Apply `0003` to production (existing database)
 

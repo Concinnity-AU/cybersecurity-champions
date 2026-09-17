@@ -1,5 +1,8 @@
-/* GET /r/:session_id — server-rendered HTML with OG tags for social previews. */
+/* GET /r/:session_id — server-rendered HTML with OG tags for social previews.
+   `?via=<platform>` stays on og:url (Facebook and LinkedIn link the post to
+   og:url) and is passed on to the Challenge link as a share referral. */
 
+import { challengeUrlFromShare, parseVia } from '../_shared/share';
 import { TIER_LABELS, tierFor } from '../_shared/tiers';
 import type { Env, Tier } from '../_shared/types';
 
@@ -19,7 +22,7 @@ function esc(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
-export const onRequestGet: PagesFunction<Env, 'session_id'> = async ({ params, env }) => {
+export const onRequestGet: PagesFunction<Env, 'session_id'> = async ({ params, request, env }) => {
   const sessionId = String(params.session_id || '');
   if (!sessionId) return new Response('Not found', { status: 404 });
 
@@ -35,8 +38,11 @@ export const onRequestGet: PagesFunction<Env, 'session_id'> = async ({ params, e
 
   const primary = env.PRIMARY_DOMAIN;
   const ogImageUrl = `https://${primary}/og/${sessionId}.png`;
-  const challengeUrl = `https://${primary}/`;
-  const shareUrl = `https://${primary}/r/${sessionId}`;
+  const homeUrl = `https://${primary}/`;
+  const via = parseVia(new URL(request.url).searchParams.get('via'));
+  const shareUrl = `https://${primary}/r/${sessionId}${via ? `?via=${via}` : ''}`;
+  // Only a real completion can refer anyone; an unknown id is a plain visit.
+  const challengeUrl = row ? challengeUrlFromShare(primary, sessionId, via) : homeUrl;
 
   let score = 0;
   let total = 10;
@@ -139,7 +145,7 @@ export const onRequestGet: PagesFunction<Env, 'session_id'> = async ({ params, e
         <path d="M5 12h14m-6-6 6 6-6 6" />
       </svg>
     </a>
-    <p class="foot">A free community program by TIMS &amp; Concinnity · <a href="${esc(challengeUrl)}">${esc(primary)}</a><br />
+    <p class="foot">A free community program by TIMS &amp; Concinnity · <a href="${esc(homeUrl)}">${esc(primary)}</a><br />
       Supported by the Australian Government through the Department of Home Affairs.</p>
   </main>
 </body>

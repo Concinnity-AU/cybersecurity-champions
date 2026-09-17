@@ -101,6 +101,7 @@ returns, with `keepalive: true`, and ignores the response. Idempotent per
 | `utm_source` / `utm_medium` / `utm_campaign` | string\|null | optional, ≤120 after trimming; **lower-cased**; empty → `null` |
 | `utm_content` | string\|null | optional, ≤120 after trimming; stored **verbatim** (creative IDs, e.g. from Publer, may be case-sensitive); empty → `null` |
 | `referrer` | string\|null | optional; a bare hostname (`^[a-z0-9.-]+$` after lower-casing, ≤253) — no scheme, path or query; empty → `null` |
+| `shared_by` | string\|null | optional; the sharer's `session_id` when the visitor came through a participant share link. Dropped (the start is still recorded) if it isn't a UUID or equals `session_id` |
 
 The attribution fields are shared with `/api/lead`
 (`functions/_shared/attribution.ts`).
@@ -239,7 +240,10 @@ The client sends it with `keepalive: true` and ignores the response.
 | Field | Type | Rules |
 |---|---|---|
 | `session_id` | string | UUID, required |
-| `platform` | enum | one of `facebook`, `whatsapp`, `copy`, `native`, `twitter` |
+| `platform` | enum | one of `facebook`, `whatsapp`, `linkedin`, `native`, `copy`, `twitter` (X) — `SHARE_PLATFORMS` in `functions/_shared/share.ts` |
+
+`native` is the device share sheet. Where there is none (most desktop
+browsers), the Share button copies the link instead and records `copy`.
 
 **Responses** — all bodyless:
 
@@ -258,6 +262,20 @@ Server-rendered HTML share landing page with Open Graph and Twitter Card meta
 tags, so links pasted into Facebook/WhatsApp/LinkedIn render a rich preview.
 Looks up the completion (and the lead's first name, if any) to personalise the
 title and description. Falls back to generic copy if the session isn't found.
+
+**Share referrals.** The result screen hands out one link per platform:
+`/r/:session_id?via=<platform>`. `via` must be one of the `/api/share`
+platforms; anything else is ignored. The page keeps `via` on `og:url`
+(Facebook and LinkedIn link the post to `og:url`), and its "Take the
+challenge" button points to:
+
+```
+https://<PRIMARY_DOMAIN>/?utm_source=<via>&utm_medium=share&utm_campaign=participant_share&shared_by=<session_id>
+```
+
+Links with no valid `via` (including links shared before this change) get
+`utm_source=shared_link`. If the session isn't found, the button goes to the
+plain home page with no referral.
 
 - `Content-Type: text/html`
 - `Cache-Control: public, max-age=300, s-maxage=300`

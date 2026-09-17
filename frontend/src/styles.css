@@ -850,12 +850,34 @@ html.is-embed .cc-shell {
   font-size: 13px; font-weight: 800;
 }
 
-.thanks__share { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
-.thanks__share-title {
+.thanks__share { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; text-align: center; }
+.thanks__share-score {
   font-size: 13px; text-transform: uppercase; letter-spacing: .12em;
   color: var(--ink-3); font-weight: 800;
   margin: 0;
 }
+.thanks__share-title {
+  font-size: 20px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 6px;
+  text-wrap: balance;
+}
+.thanks__share-cta { color: var(--tims-purple); white-space: nowrap; }
+.thanks__share-more {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 4px 10px;
+  font-size: 14px;
+}
+.share-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  background: none; border: 0; padding: 10px 4px; min-height: 44px;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.share-link:hover { color: var(--tims-purple); text-decoration: underline; }
+.share-link.is-copied { color: var(--accent-green); }
+.share-link__icon { width: 14px; height: 14px; }
 .thanks__share-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

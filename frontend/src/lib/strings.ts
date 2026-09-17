@@ -78,6 +78,16 @@ export const STRINGS = {
     privacyContact:
       'To access or correct your details, or to make a complaint, email connect@tims.org.au. If you’re not satisfied with our response, you can contact the Office of the Australian Information Commissioner at',
     workshop: 'Prefer in person? Ask about workshops',
+    // "Challenge them" share block.
+    shareScore: (score: number, total: number, tier: string) => `You scored ${score}/${total} — ${tier}`,
+    shareTitle: 'Think someone you know can beat your score?',
+    shareCta: 'Challenge them.',
+    shareText: (score: number, total: number, tier: string) =>
+      `I scored ${score}/${total} (${tier}) on the Cybersecurity Champions Challenge. Think you can beat me? It's free and takes 90 seconds.`,
+    shareNative: 'Share',
+    shareCopy: 'Copy link',
+    shareCopied: 'Link copied!',
+    shareX: 'Post on X',
   },
   sourcesIntro:
     'Every scenario in this challenge is based on real scams reported to Australian authorities.',

@@ -4,7 +4,8 @@ The app uses a single **Cloudflare D1** database (SQLite), bound to Functions as
 `DB`. The schema is defined in `migrations/0001_initial.sql`, seeded by
 `migrations/0002_seed_challenges.sql`, and extended by
 `migrations/0003_attribution_and_funnel.sql` (`sessions`, `events`, and the
-attribution columns on `leads`).
+attribution columns on `leads`), and `migrations/0004_share_referrals.sql`
+(`sessions.shared_by`).
 
 ```
 challenges ──1:N── challenge_translations
@@ -125,8 +126,12 @@ PII. A retake is a new session. Added in `0003`.
 | `embedded` | INTEGER | 1 if started inside the Squarespace iframe; default 0 |
 | `language` | TEXT | default `en` |
 | `started_at` | TEXT | defaults to `CURRENT_TIMESTAMP` |
+| `shared_by` | TEXT | optional; `session_id` of the participant whose share link brought this visitor in (no FK). Added in `0004` |
 
-Indexed by `started_at` and `(utm_source, utm_campaign)`.
+Indexed by `started_at`, `(utm_source, utm_campaign)` and `shared_by`.
+
+Sessions that came from a participant share also have `utm_medium = 'share'`,
+`utm_campaign = 'participant_share'` and `utm_source` set to the share platform.
 
 ## `events`
 
@@ -151,7 +156,7 @@ Analytics events: one row per share action.
 |---|---|---|
 | `id` | INTEGER PK | autoincrement |
 | `completion_id` | INTEGER | FK → `completions(id)` |
-| `platform` | TEXT | `facebook`/`whatsapp`/`copy`/`native`/`twitter` |
+| `platform` | TEXT | `facebook`/`whatsapp`/`linkedin`/`native`/`copy`/`twitter` (no CHECK; `linkedin` from `0004`) |
 | `created_at` | TEXT | defaults to `CURRENT_TIMESTAMP` |
 
 ## Indexes (summary)
@@ -166,6 +171,7 @@ idx_challenges_active_type ON challenges(is_active, type)
 idx_sessions_started       ON sessions(started_at)           -- 0003
 idx_sessions_source        ON sessions(utm_source, utm_campaign)  -- 0003
 idx_events_session_type    ON events(session_id, event_type) -- 0003
+idx_sessions_shared_by     ON sessions(shared_by)            -- 0004
 ```
 
 ## Querying the database

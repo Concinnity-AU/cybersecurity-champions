@@ -107,6 +107,10 @@ Step-by-step in
 - `referrer` — the referring site's **hostname only** (e.g. `l.facebook.com`),
   never a path or query string. The server rejects anything that isn't a bare
   hostname.
+- `shared_by`: when someone arrives through a participant's share link, the
+  sharer's anonymous `session_id`. The share link already contains it, so this
+  exposes nothing new. It is stored on the new `sessions` row only, never on
+  `leads`.
 
 These are stored on the anonymous `sessions` row (via `/api/start`) and, if the
 person signs up, on their `leads` row (via `/api/lead`), so starts, completions,
