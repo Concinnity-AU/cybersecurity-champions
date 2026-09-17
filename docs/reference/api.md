@@ -11,7 +11,9 @@ served from the same origin as the SPA. File-based routing maps paths to files.
   social crawlers.
 
 Request bodies are validated with [Zod](https://zod.dev/). Validation failures
-return `400` with the Zod issue list.
+return `400` — with the Zod issue list for `/api/complete` and `/api/lead`, and
+an empty body for the fire-and-forget endpoints (`/api/start`, `/api/event`,
+`/api/share`).
 
 Base URL in production: `https://cybersecurity.tims.org.au`
 
@@ -35,7 +37,7 @@ Source: `functions/api/health.ts`
 
 Returns a randomised, ordered set of active challenges plus a fresh
 `session_id`. The session ID is generated here and threaded through
-`/api/complete`, `/api/lead`, and `/api/share`.
+`/api/start`, `/api/complete`, `/api/event`, `/api/lead`, and `/api/share`.
 
 **Query parameters**
 
@@ -82,6 +84,38 @@ Selection logic (type distribution, difficulty ordering) is documented in
 
 ---
 
+## `POST /api/start`
+
+Fire-and-forget analytics: records a challenge start (funnel stage 1) with its
+first-touch campaign attribution. The SPA sends it as soon as `/api/challenges`
+returns, with `keepalive: true`, and ignores the response. Idempotent per
+`session_id` (`INSERT OR IGNORE` into `sessions`).
+
+**Request body**
+
+| Field | Type | Rules |
+|---|---|---|
+| `session_id` | string | UUID, required |
+| `embedded` | boolean | default `false`; `true` when running inside the Squarespace iframe |
+| `language` | string | 2–8 chars, default `en` |
+| `utm_source` / `utm_medium` / `utm_campaign` | string\|null | optional, ≤120 after trimming; **lower-cased**; empty → `null` |
+| `utm_content` | string\|null | optional, ≤120 after trimming; stored **verbatim** (creative IDs, e.g. from Publer, may be case-sensitive); empty → `null` |
+| `referrer` | string\|null | optional; a bare hostname (`^[a-z0-9.-]+$` after lower-casing, ≤253) — no scheme, path or query; empty → `null` |
+
+The attribution fields are shared with `/api/lead`
+(`functions/_shared/attribution.ts`).
+
+**Responses** — all bodyless:
+
+| Status | Meaning |
+|---|---|
+| `204` | Recorded, **or** the session already existed (silently ignored). |
+| `400` | Invalid JSON or validation failure. |
+
+Source: `functions/api/start.ts`.
+
+---
+
 ## `POST /api/complete`
 
 Records an **anonymous** completion (no PII). Idempotent per `session_id`: a
@@ -120,10 +154,40 @@ Source: `functions/api/complete.ts`.
 
 ---
 
+## `POST /api/event`
+
+Fire-and-forget analytics: records a click-level funnel step that has no table
+of its own. The client sends it with `keepalive: true` (so it completes even
+though the click opens a new tab) and ignores the response.
+
+**Request body**
+
+| Field | Type | Rules |
+|---|---|---|
+| `session_id` | string | UUID, required |
+| `event_type` | enum | `course_cta_click` (the "Start the free course" button) or `workshop_click` (the "Ask about workshops" link) |
+
+Only inserted if a `sessions` row exists for `session_id` (i.e. `/api/start` was
+recorded); otherwise silently ignored. Repeat clicks insert repeat rows — count
+distinct sessions when reporting.
+
+**Responses** — all bodyless:
+
+| Status | Meaning |
+|---|---|
+| `204` | Recorded, **or** no matching session found (silently ignored). |
+| `400` | Invalid JSON or validation failure. |
+
+Source: `functions/api/event.ts`.
+
+---
+
 ## `POST /api/lead`
 
-Captures a lead (PII) and links it to the completion via `session_id`. This is
-the **only** endpoint that requires Turnstile verification.
+Captures the optional "updates and resources" sign-up (PII), stores it with its
+`session_id` and attribution, and links it to the completion (if any). A lead is
+a separate measure from a completion, not a gate — the score is shown before the
+form. This is the **only** endpoint that requires Turnstile verification.
 
 **Request body**
 
@@ -132,16 +196,18 @@ the **only** endpoint that requires Turnstile verification.
 | `session_id` | string | UUID, required |
 | `first_name` | string | 1–100 chars |
 | `email` | string | valid email, ≤254 chars |
-| `phone` | string | optional; `^[+0-9\s()-]{6,}$`; empty string allowed |
-| `postcode` | string | optional; `^\d{4}$` (4-digit AU); empty allowed |
+| `phone` | string | optional; `^[+0-9\s()-]{6,}$`, ≤40; empty string allowed. Not sent by the current form. |
+| `postcode` | string | optional; `^\d{4}$` (4-digit AU); empty allowed. Not sent by the current form. |
 | `consent_program` | boolean | **must be `true`** |
-| `consent_marketing` | boolean | default `false` |
+| `consent_marketing` | boolean | default `false`. The current form sends `true` (its single checkbox covers updates and resources). |
 | `turnstile_token` | string | required, ≥1 char |
-| `utm_source` / `utm_medium` / `utm_campaign` | string\|null | optional, ≤120 |
+| `utm_source` / `utm_medium` / `utm_campaign` / `utm_content` / `referrer` | string\|null | optional; same rules as [`/api/start`](#post-apistart) |
 
 Flow: validate → require `consent_program` → verify Turnstile token against
-Cloudflare's siteverify → `INSERT` into `leads` → `UPDATE completions.lead_id`
-for the matching session.
+Cloudflare's siteverify → `INSERT` into `leads` (including `session_id` and
+attribution) → `UPDATE completions.lead_id` for the matching session.
+
+> Requires migration `0003` — without the new `leads` columns the insert fails.
 
 > The `language` column is currently hard-coded to `'en'` on insert (multilingual
 > content is a phase-2 item).
@@ -220,5 +286,7 @@ Source: `functions/og/[session_id].png.ts` + `functions/_shared/og-image.ts`.
 ## Client API wrapper
 
 The SPA calls these endpoints through `frontend/src/lib/api.ts`, which centralises
-fetch logic and error handling. `postShare` is fire-and-forget; the others throw
+fetch logic and error handling. `postStart`, `postEvent` and `postShare` are
+fire-and-forget (`keepalive: true`, errors ignored); the others throw
 `Error("HTTP <status>: <detail>")` on non-2xx so the UI can show an error state.
+Attribution values come from `frontend/src/lib/attribution.ts`.

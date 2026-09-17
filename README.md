@@ -1,6 +1,6 @@
 # Cybersecurity Champions Challenge
 
-Interactive lead-magnet for the Toowoomba International Multicultural Society (TIMS) **Cybersecurity Champions** program — a free cybersecurity training program for community members, run in partnership with **Concinnity Consulting**.
+Interactive awareness challenge for the Toowoomba International Multicultural Society (TIMS) **Cybersecurity Champions** program — a free cybersecurity training program for community members, run in partnership with **Concinnity Consulting**.
 
 A 90-second, mobile-first challenge with ten rapid scenarios drawn from real scams reported to Australian authorities. Designed to be embedded into the Squarespace site at `tims.org.au/cybersecurity` as well as hosted standalone at `cybersecurity.tims.org.au`.
 
@@ -43,8 +43,10 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
 │  ├─ Static assets (Vite-built React SPA)                           │
 │  └─ Pages Functions (file-based routing):                          │
 │      • /api/challenges  → randomised challenge set from D1         │
+│      • /api/start       → record challenge start + attribution     │
 │      • /api/complete    → record completion, return share/og URLs  │
-│      • /api/lead        → Turnstile-verified lead capture          │
+│      • /api/event       → record course CTA / workshop click       │
+│      • /api/lead        → Turnstile-verified updates sign-up       │
 │      • /api/share       → record share event                       │
 │      • /r/:session_id   → server-rendered share landing + OG meta  │
 │      • /og/:session.png → dynamic 1200×630 PNG via satori + resvg  │
@@ -52,8 +54,9 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
                               ▼
                 ┌──────────────────────────┐
                 │  Cloudflare D1 (SQLite)  │
-                │  challenges · leads ·    │
-                │  completions · shares    │
+                │  challenges · sessions · │
+                │  completions · events ·  │
+                │  leads · shares          │
                 └──────────────────────────┘
 ```
 
@@ -64,8 +67,8 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
 ├── frontend/                  # The whole application — SPA + Pages Functions
 │   ├── public/assets/         # TIMS + Concinnity logos, favicon
 │   ├── src/                   # React SPA
-│   │   ├── components/        # Welcome, Challenge, Feedback, Result, ThankYou, ...
-│   │   ├── lib/               # api client, config, types, turnstile, iframe helpers
+│   │   ├── components/        # Welcome, Challenge, Feedback, Result, LeadForm, ...
+│   │   ├── lib/               # api client, attribution, config, types, turnstile, iframe helpers
 │   │   ├── styles.css
 │   │   ├── App.tsx
 │   │   └── main.tsx
@@ -74,12 +77,14 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
 │   │   │   ├── _middleware.ts # CORS for /api/* responses
 │   │   │   ├── health.ts
 │   │   │   ├── challenges.ts
+│   │   │   ├── start.ts
 │   │   │   ├── complete.ts
+│   │   │   ├── event.ts
 │   │   │   ├── lead.ts
 │   │   │   └── share.ts
 │   │   ├── r/[session_id].ts        # share landing
 │   │   ├── og/[session_id].png.ts   # dynamic OG PNG
-│   │   └── _shared/                 # cross-function helpers (db, tiers, cors, og, ...)
+│   │   └── _shared/                 # cross-function helpers (db, tiers, cors, og, attribution, ...)
 │   ├── index.html
 │   ├── vite.config.ts
 │   ├── wrangler.toml          # D1 binding, env vars
@@ -88,7 +93,8 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
 │   └── package.json
 ├── migrations/
 │   ├── 0001_initial.sql       # schema
-│   └── 0002_seed_challenges.sql  # 15 seed challenges with en translations
+│   ├── 0002_seed_challenges.sql  # 15 seed challenges with en translations
+│   └── 0003_attribution_and_funnel.sql  # sessions + events tables, lead attribution columns
 ├── embed/
 │   ├── embed.js               # drop-in script (alternative installation)
 │   └── EMBED_SNIPPET.html     # ★ copy-paste this into Squarespace
@@ -152,7 +158,7 @@ npm run deploy
 
 The first run creates a Pages project named `cybersecurity-champions-frontend`. Output gives you a `*.pages.dev` URL — test it works.
 
-### 5. Apply schema + seed to remote D1
+### 5. Apply schema, seed + migrations to remote D1
 
 ```sh
 cd frontend
@@ -254,7 +260,12 @@ Push to `main` — `.github/workflows/deploy.yml` builds and deploys. About 90 s
 cd frontend
 npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0001_initial.sql
 npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0002_seed_challenges.sql
+npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0003_attribution_and_funnel.sql
 ```
+
+Each file is applied **once**. On an existing database apply only the new file,
+and apply it **before** deploying code that depends on it — see
+[How-to: Run migrations](docs/how-to/run-migrations.md).
 
 ## Installing the Squarespace embed
 
@@ -264,6 +275,8 @@ npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations
 4. Test in a fresh browser session — the iframe should appear and auto-resize as the user progresses through screens.
 
 The embed sets a `sandbox` attribute with the minimum permissions needed. The postMessage origin check is locked to `https://cybersecurity.tims.org.au`.
+
+The snippet also forwards the host page's `utm_*` parameters and the visitor's referring hostname (`ref`) onto the iframe `src`, so embedded traffic is attributed to its campaign. Point campaign links at the TIMS page (or the standalone URL) with UTMs, e.g. `https://tims.org.au/cybersecurity?utm_source=tims&utm_medium=facebook&utm_campaign=sept-course&utm_content=<publer creative id>`. If the Code Block was pasted before attribution forwarding was added, re-paste it — see [How-to: Update the embed](docs/how-to/update-the-embed.md).
 
 ## Content management
 
@@ -284,7 +297,7 @@ npx wrangler d1 execute cybersecurity-champions-db --remote --command="UPDATE ch
 ### Export leads
 ```sh
 cd frontend
-npx wrangler d1 execute cybersecurity-champions-db --remote --command="SELECT id, first_name, email, phone, created_at FROM leads ORDER BY created_at DESC;" --json > leads-export.json
+npx wrangler d1 execute cybersecurity-champions-db --remote --command="SELECT id, first_name, email, consent_marketing, utm_source, utm_campaign, utm_content, referrer, created_at FROM leads ORDER BY created_at DESC;" --json > leads-export.json
 ```
 
 ### Watch live errors
@@ -293,19 +306,23 @@ cd frontend
 npx wrangler pages deployment tail --project-name=cybersecurity-champions-frontend
 ```
 
-## Roadmap — deferred but worth adding
+## Funnel and attribution
 
-These are not blockers for launch but are sensible next steps once the program has real traffic and you know what you want to measure.
+The result screen shows the score straight away — nothing is gated behind the form. Its primary call to action is the free Tribal Habits course; the updates sign-up (lead form) is optional and sits below it. Each stage is recorded against the `session_id` issued by `/api/challenges`:
 
-### Funnel / dropout tracking
-Today the system records **anonymous completions** (everyone who finishes all 10 challenges, regardless of whether they fill in the lead form) and **leads** (those who submit). It does **not** record people who start the challenge but bail mid-way.
+| Stage | Recorded by | Table |
+|---|---|---|
+| Started | `POST /api/start`, when the challenge set loads | `sessions` — one row per attempt, with first-touch UTMs + referrer hostname |
+| Completed | `POST /api/complete` | `completions` |
+| Course CTA click | `POST /api/event` (`course_cta_click`) | `events` |
+| Workshop link click | `POST /api/event` (`workshop_click`) | `events` |
+| Signed up for updates | `POST /api/lead` — a separate measure, not a funnel gate | `leads` |
 
-To add dropout tracking:
-1. New `POST /api/start` endpoint that creates a row in `completions` (or a new `sessions` table) when the user taps "Start the challenge". Record only `session_id`, `started_at`, `language`, and any UTM params already in the URL.
-2. Change `POST /api/complete` to `UPDATE` the existing row by `session_id` instead of `INSERT`.
-3. Optionally record per-challenge views (one row per question seen) for fine-grained funnel analytics.
+Everything joins on `session_id`, so every stage can be broken down by `utm_source` / `utm_medium` / `utm_campaign` / `utm_content`. A retake is a new session. Course enrolment happens on Tribal Habits and isn't visible to us — the course CTA click is the last step we can measure.
 
-Trade-off: more D1 writes (well within free tier at expected volume), more rows to query when reporting, and a privacy-notice update since you're now recording every visit (even though it's still anonymous and IP-free).
+Concinnity Studio (the internal dashboard) shows the funnel and a by-source breakdown; SQL equivalents are in [How-to: Export and manage leads](docs/how-to/export-and-manage-leads.md).
+
+Still not recorded: per-question progress (where people drop out mid-challenge), IP addresses, and full referrer URLs.
 
 ## Out of scope (intentionally)
 
@@ -313,7 +330,7 @@ Trade-off: more D1 writes (well within free tier at expected volume), more rows 
 - No admin UI — content is edited in D1 (dashboard or `wrangler`).
 - No email sending — leads are stored; TIMS follows up manually or via export.
 - No multilingual content at launch (schema supports it; phase 2 will add).
-- No payments, no A/B framework, no detailed analytics dashboard.
+- No payments, no A/B framework, and no analytics dashboard in this app — reporting lives in Concinnity Studio.
 
 ## Troubleshooting
 

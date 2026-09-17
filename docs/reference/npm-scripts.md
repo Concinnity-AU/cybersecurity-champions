@@ -27,11 +27,11 @@ All D1 scripts target the database named `cybersecurity-champions-db`.
 | Script | Target | What it does |
 |---|---|---|
 | `npm run db:create` | — | Creates the D1 database. **One-time.** Copy the printed `database_id` into `wrangler.toml`. |
-| `npm run db:local:init` | local | Applies schema (`0001`) + seed (`0002`) to the local SQLite DB. |
+| `npm run db:local:init` | local | Applies schema (`0001`), seed (`0002`) and attribution/funnel tables (`0003`) to the local SQLite DB. Empty database only. |
 | `npm run db:local:reset` | local | Drops all tables, then re-runs `db:local:init`. Clean slate for dev. |
-| `npm run db:remote:init` | **remote** | Applies schema + seed to **production** D1. Used during first setup. |
+| `npm run db:remote:init` | **remote** | Applies `0001`, `0002` and `0003` to **production** D1. First setup only — on an existing database, apply just the new file (see [How-to: Run migrations](../how-to/run-migrations.md)). |
 
-> `db:local:reset` drops `shares`, `completions`, `leads`,
+> `db:local:reset` drops `events`, `sessions`, `shares`, `completions`, `leads`,
 > `challenge_translations`, and `challenges`. It's local-only — there is no
 > remote reset script by design (so you can't wipe production by reflex).
 
@@ -41,7 +41,7 @@ For anything not covered by a script, call wrangler directly:
 
 ```sh
 # apply a single migration file to production
-npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0003_my_change.sql
+npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0004_my_change.sql
 
 # run a one-off query locally
 npx wrangler d1 execute cybersecurity-champions-db --local --command="SELECT count(*) FROM leads;"

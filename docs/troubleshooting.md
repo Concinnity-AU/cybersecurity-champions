@@ -12,12 +12,15 @@ commands run from `frontend/`.
 **Cause:** the database has no active challenges (seed not applied, or all
 retired).
 
-**Fix:** run the seed, then verify:
+**Fix:** run the seed, then verify. On an empty database use the init script;
+on an existing one apply just the seed file
+(`--file=../migrations/0002_seed_challenges.sql`), since the init scripts also
+apply `0003`, which can only run once.
 
 ```sh
-# local
+# local (empty database)
 npm run db:local:init
-# production
+# production (empty database)
 npm run db:remote:init
 
 npx wrangler d1 execute cybersecurity-champions-db --local \
@@ -97,6 +100,36 @@ accepts messages from `https://cybersecurity.tims.org.au`; make sure the iframe
 `src` (and `EMBED_ORIGIN` in the snippet) matches that origin exactly. Re-paste
 the snippet into the Squarespace Code Block if you changed it. See
 [How-to: Update the embed](how-to/update-the-embed.md).
+
+---
+
+## Sign-ups fail, or starts / course clicks aren't recorded
+
+**Cause:** migration `0003_attribution_and_funnel.sql` hasn't been applied to
+that database. `/api/lead` then errors on insert (the `leads` table lacks
+`session_id`, `utm_content`, `referrer`), and `/api/start` / `/api/event` error
+on the missing `sessions` / `events` tables. Starts and clicks are
+fire-and-forget, so users see nothing wrong — only the sign-up form shows an
+error. Logs show `no such table` or `no such column`.
+
+**Fix:** apply the migration once (see
+[How-to: Run migrations](how-to/run-migrations.md)):
+
+```sh
+npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0003_attribution_and_funnel.sql
+```
+
+---
+
+## Embedded visits have no campaign attribution
+
+**Cause:** the Squarespace Code Block still holds a snippet from before
+attribution forwarding, so the iframe loads a bare `/?embed=1` — or the TIMS page
+URL itself had no UTMs.
+
+**Fix:** inspect the iframe `src` in devtools. If it has no `utm_*`, re-paste
+`embed/EMBED_SNIPPET.html`. See
+[How-to: Update the embed](how-to/update-the-embed.md#campaign-attribution-forwarding).
 
 ---
 

@@ -6,6 +6,12 @@ and **manual** (wrangler from your machine, for one-offs).
 First-time setup (creating the Pages project, D1, domain) is a separate,
 one-time process — see [Tutorial: Production setup](../tutorials/production-setup.md).
 
+> **Database changes go first.** CI deploys code only — it never runs
+> migrations. If your change depends on a new migration, apply it to production
+> **before** pushing (see [How-to: Run migrations](run-migrations.md)). In
+> particular, `0003_attribution_and_funnel.sql` must be applied before the
+> attribution/funnel release, or `/api/lead` sign-ups fail.
+
 ## Automatic deploy (the normal path)
 
 Push to `main`. The workflow `.github/workflows/deploy.yml` builds and deploys to
@@ -65,8 +71,10 @@ or `npm run deploy`). See [How-to: Manage secrets](../how-to/manage-secrets.md).
 https://cybersecurity.tims.org.au/api/health   → {"ok":true}
 ```
 
-Then load the site and complete a challenge. To watch for runtime errors live,
-see [How-to: Monitor and debug](monitor-and-debug.md).
+Then load the site and complete a challenge, and check in devtools that
+`POST /api/start` and `POST /api/event` (click the course button) return `204`.
+To watch for runtime errors live, see
+[How-to: Monitor and debug](monitor-and-debug.md).
 
 ## Rolling back
 

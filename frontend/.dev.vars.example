@@ -1,0 +1,7 @@
+# Local secrets for `wrangler pages dev` (Pages Functions).
+# Copy to .dev.vars (gitignored):  cp .dev.vars.example .dev.vars
+# Production uses `wrangler pages secret put` instead — never commit real secrets.
+
+# Cloudflare Turnstile always-passes TEST secret, so /api/lead works locally.
+# Pair it with the test site key 1x00000000000000000000AA in .env.local.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA

@@ -3,9 +3,11 @@ import type {
   ChallengesResponse,
   CompletePayload,
   CompleteResponse,
+  EventPayload,
   LeadPayload,
   LeadResponse,
   SharePayload,
+  StartPayload,
 } from './types';
 
 const url = (path: string) => `${config.apiBase}${path}`;
@@ -47,9 +49,10 @@ export function postLead(payload: LeadPayload): Promise<LeadResponse> {
   });
 }
 
-export function postShare(payload: SharePayload): void {
-  // Fire-and-forget — analytics shouldn't block UX
-  fetch(url('/api/share'), {
+// Fire-and-forget — analytics shouldn't block UX. keepalive lets the request
+// finish even when the click opens a new tab or navigates away.
+function beacon(path: string, payload: unknown): void {
+  fetch(url(path), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -57,4 +60,16 @@ export function postShare(payload: SharePayload): void {
   }).catch(() => {
     /* ignore */
   });
+}
+
+export function postShare(payload: SharePayload): void {
+  beacon('/api/share', payload);
+}
+
+export function postStart(payload: StartPayload): void {
+  beacon('/api/start', payload);
+}
+
+export function postEvent(payload: EventPayload): void {
+  beacon('/api/event', payload);
 }

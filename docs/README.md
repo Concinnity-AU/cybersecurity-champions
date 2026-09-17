@@ -36,14 +36,14 @@ Task-oriented recipes for things you'll do repeatedly.
 - **[Manage challenges](how-to/manage-challenges.md)** — add, edit, and retire
   quiz challenges.
 - **[Export and manage leads](how-to/export-and-manage-leads.md)** — pull lead
-  data out of D1 for follow-up.
+  data out of D1 for follow-up, and report the funnel by campaign source.
 - **[Run migrations](how-to/run-migrations.md)** — apply schema and seed changes
   locally and in production.
 - **[Deploy](how-to/deploy.md)** — routine deploys via CI, and manual deploys.
 - **[Manage secrets](how-to/manage-secrets.md)** — set and rotate the Turnstile
   secret and Cloudflare API token.
 - **[Update the embed](how-to/update-the-embed.md)** — change the Squarespace
-  embed snippet.
+  embed snippet and test campaign attribution.
 - **[Monitor and debug](how-to/monitor-and-debug.md)** — tail live logs and test
   the OG image and share pages.
 

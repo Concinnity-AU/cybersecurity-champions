@@ -1,178 +1,295 @@
+/* Result screen — score first, free course as the primary CTA, then an
+   optional updates sign-up. Nothing sits between finishing the Challenge
+   and the course. */
+
 import { useState } from 'react';
-import { ArrowIcon, CheckIcon, ShieldIcon, TrophyIcon } from './Icon';
-import { useTurnstile } from '../lib/turnstile';
-import { postLead } from '../lib/api';
-import { config, getUtmParams } from '../lib/config';
-import type { LeadPayload } from '../lib/types';
+import { ArrowIcon, CheckIcon, CopyIcon, CrossIcon, FacebookIcon, ShareIcon, WhatsAppIcon } from './Icon';
+import { LeadForm } from './LeadForm';
+import { STRINGS, type TierKey } from '../lib/strings';
+import { config } from '../lib/config';
+import { postEvent, postShare } from '../lib/api';
+import type { SharePlatform } from '../lib/types';
 
-interface ResultProps {
-  total: number;
-  sessionId: string;
-  onSubmit: (firstName: string) => void;
-}
+const S = STRINGS.result;
 
-const Field = ({
-  label,
-  error,
-  children,
+const tierFor = (score: number) => {
+  let t: typeof STRINGS.tiers[number] = STRINGS.tiers[0];
+  for (const tier of STRINGS.tiers) if (score >= tier.min) t = tier;
+  return t;
+};
+
+const bridgeFor = (tier: TierKey): string =>
+  tier === 'champion'
+    ? S.courseBridge.high
+    : tier === 'learner'
+      ? S.courseBridge.low
+      : S.courseBridge.mid;
+
+const ScoreRing = ({
+  score,
+  total,
+  tierColor,
 }: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) => (
-  <label className={`field ${error ? 'has-error' : ''}`}>
-    <span className="field__label">{label}</span>
-    {children}
-    {error && <span className="field__error">{error}</span>}
-  </label>
-);
-
-export const Result = ({ total, sessionId, onSubmit }: ResultProps) => {
-  const [form, setForm] = useState({
-    firstName: '',
-    email: '',
-    phone: '',
-    consent: false,
-  });
-  const [err, setErr] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-
-  const turnstile = useTurnstile(config.turnstileSiteKey);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setServerError(null);
-    const next: Record<string, string> = {};
-    if (!form.firstName.trim()) next.firstName = 'Please share your first name';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'A valid email please';
-    if (!form.consent) next.consent = 'Please tick the box to continue';
-    setErr(next);
-    if (Object.keys(next).length > 0) return;
-
-    setSubmitting(true);
-    try {
-      const token = await turnstile.getToken().catch(() => '');
-      if (!token) {
-        setServerError('Could not verify you are human. Please try again.');
-        setSubmitting(false);
-        return;
-      }
-      const utm = getUtmParams();
-      const payload: LeadPayload = {
-        session_id: sessionId,
-        first_name: form.firstName.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim() || undefined,
-        consent_program: true,
-        consent_marketing: false,
-        turnstile_token: token,
-        ...utm,
-      };
-      await postLead(payload);
-      onSubmit(form.firstName.trim());
-    } catch (e) {
-      setServerError(
-        e instanceof Error ? e.message : 'Something went wrong. Please try again.',
-      );
-      turnstile.reset();
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
+  score: number;
+  total: number;
+  tierColor: string;
+}) => {
+  const pct = total > 0 ? score / total : 0;
+  const r = 88;
+  const C = 2 * Math.PI * r;
   return (
-    <div className="screen result">
-      <div className="result__teaser">
-        <div className="result__teaser-badge">
-          <TrophyIcon className="result__teaser-icon" />
+    <div className="ring">
+      <svg viewBox="0 0 200 200" className="ring__svg">
+        <circle cx="100" cy="100" r={r} className="ring__track" />
+        <circle
+          cx="100"
+          cy="100"
+          r={r}
+          className="ring__progress"
+          style={{
+            stroke: tierColor,
+            strokeDasharray: C,
+            strokeDashoffset: C * (1 - pct),
+          }}
+        />
+      </svg>
+      <div className="ring__inner">
+        <div className="ring__score">
+          {score}
+          <span>/{total}</span>
         </div>
-        <div className="result__teaser-kicker">Challenge complete</div>
-        <h2 className="result__teaser-title">Your score is ready.</h2>
-        <p className="result__teaser-body">
-          You answered all {total} questions. Pop your details in below to unlock your full
-          breakdown — and learn about the FREE Cybersecurity Champions e-learning modules.
-        </p>
-        <div className="result__teaser-lockrow">
-          <div className="result__teaser-lock">
-            <ShieldIcon className="result__teaser-lockicon" />
-          </div>
-          <div>
-            <div className="result__teaser-locktitle">Score locked</div>
-            <div className="result__teaser-locksub">Complete the form below to reveal</div>
-          </div>
-        </div>
+        <div className="ring__label">correct</div>
       </div>
-
-      <form className="lead" onSubmit={submit} noValidate>
-        <div className="lead__pitch">
-          <div className="lead__kicker">FREE · No spam, ever</div>
-          <h3 className="lead__title">
-            Unlock your breakdown — and learn about the free e-learning modules.
-          </h3>
-          <p className="lead__body">
-            Four short self-paced modules (4–8 hours total) on the Tribal Habits platform. Share
-            your details and a TIMS coordinator will be in touch with everything you need to get
-            started.
-          </p>
-        </div>
-
-        <Field label="First name" error={err.firstName}>
-          <input
-            value={form.firstName}
-            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-            placeholder="Maya"
-            autoComplete="given-name"
-          />
-        </Field>
-        <Field label="Email" error={err.email}>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            placeholder="you@example.com"
-            autoComplete="email"
-          />
-        </Field>
-        <Field label="Phone (optional)">
-          <input
-            type="tel"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            placeholder="04·· ··· ···"
-            autoComplete="tel"
-          />
-        </Field>
-
-        <label className={`consent ${err.consent ? 'has-error' : ''}`}>
-          <input
-            type="checkbox"
-            checked={form.consent}
-            onChange={(e) => setForm({ ...form, consent: e.target.checked })}
-          />
-          <span className="consent__box" aria-hidden="true">
-            {form.consent && <CheckIcon className="consent__check" />}
-          </span>
-          <span className="consent__text">
-            I'd like TIMS to contact me about my results and the FREE Champions program.
-          </span>
-        </label>
-        {err.consent && <div className="field__error">{err.consent}</div>}
-
-        <div className="turnstile-host" ref={turnstile.ref} />
-
-        {serverError && <p className="lead__error">{serverError}</p>}
-
-        <button
-          type="submit"
-          className="btn btn--primary btn--lg lead__submit"
-          disabled={submitting}
-        >
-          {submitting ? 'Submitting…' : 'Reveal my score'}
-          {!submitting && <ArrowIcon className="btn__icon" />}
-        </button>
-        <p className="lead__fine">We'll never share your details. You can opt out any time.</p>
-      </form>
     </div>
   );
 };
+
+interface ResultProps {
+  score: number;
+  total: number;
+  answers: boolean[];
+  sessionId: string;
+  shareUrl: string;
+  onRestart: () => void;
+}
+
+/** Extract the registration code from the Tribal Habits URL so we can both
+ *  attempt URL-based auto-fill AND show the code visibly on the page —
+ *  one config value, both behaviours. Tribal Habits' param is
+ *  `registration_token`; we also accept `token` for resilience against any
+ *  future rename. Returns null if no code is present in the URL. */
+function tribalHabitsTokenFromUrl(url: string): string | null {
+  try {
+    const params = new URL(url).searchParams;
+    return params.get('registration_token') ?? params.get('token');
+  } catch {
+    return null;
+  }
+}
+
+export const Result = ({
+  score,
+  total,
+  answers,
+  sessionId,
+  shareUrl,
+  onRestart,
+}: ResultProps) => {
+  const tier = tierFor(score);
+  const [copied, setCopied] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
+  const tribalToken = tribalHabitsTokenFromUrl(config.tribalHabitsEnrolUrl);
+
+  const copyToken = async (): Promise<boolean> => {
+    if (!tribalToken) return false;
+    try {
+      await navigator.clipboard.writeText(tribalToken);
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2500);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const openCourse = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    postEvent({ session_id: sessionId, event_type: 'course_cta_click' });
+    // Copy first so it's already on the clipboard by the time the new tab loads.
+    await copyToken();
+    window.open(config.tribalHabitsEnrolUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const trackedShare = (platform: SharePlatform, action?: () => void) => () => {
+    postShare({ session_id: sessionId, platform });
+    action?.();
+  };
+
+  const shareText = `I scored ${score}/${total} on the Cybersecurity Champions Challenge. Can you beat it?`;
+
+  const shareFacebook = trackedShare('facebook', () => {
+    const u = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+    window.open(u, '_blank', 'noopener,noreferrer,width=600,height=520');
+  });
+
+  const shareWhatsApp = trackedShare('whatsapp', () => {
+    const u = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+    window.open(u, '_blank', 'noopener,noreferrer');
+  });
+
+  const shareCopy = trackedShare('copy', async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt('Copy your share link:', shareUrl);
+    }
+  });
+
+  const shareNative = trackedShare('native', () => {
+    if (navigator.share) {
+      navigator
+        .share({ title: 'Cybersecurity Champions Challenge', text: shareText, url: shareUrl })
+        .catch(() => {
+          /* user cancelled — fine */
+        });
+    } else {
+      shareCopy();
+    }
+  });
+
+  return (
+    <div className="screen thanks">
+      <div className="thanks__reveal">
+        <div className="thanks__reveal-label">{S.kicker}</div>
+        <ScoreRing score={score} total={total} tierColor={tier.color} />
+        <div>
+          <div className="thanks__tier-label">You're a</div>
+          <h2 className="thanks__tier-title">{tier.title}</h2>
+          <p className="thanks__tier-blurb">{tier.blurb}</p>
+        </div>
+        <div className="thanks__breakdown">
+          {answers.map((a, i) => (
+            <div key={i} className={`result__pill ${a ? 'is-correct' : 'is-wrong'}`}>
+              {a ? <CheckIcon className="result__pill-icon" /> : <CrossIcon className="result__pill-icon" />}
+              <span>Q{i + 1}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <section className="path path--primary course" aria-labelledby="course-title">
+        <div className="lead__kicker">{S.courseKicker}</div>
+        <h3 className="path__title course__title" id="course-title">{S.courseTitle}</h3>
+        <p className="course__bridge">
+          <strong>{S.scored(score, total)}.</strong> {bridgeFor(tier.key)}
+        </p>
+        <p className="path__body">{S.courseBody}</p>
+
+        {tribalToken && (
+          <>
+            <p className="path__token-instr">{S.courseTokenInstr}</p>
+            <button
+              type="button"
+              className={`path__token ${tokenCopied ? 'is-copied' : ''}`}
+              onClick={copyToken}
+              aria-label={
+                tokenCopied
+                  ? `Registration code ${tribalToken} copied to clipboard`
+                  : `Copy registration code ${tribalToken} to clipboard`
+              }
+            >
+              <code className="path__token-value">{tribalToken}</code>
+              <span className="path__token-action" aria-hidden="true">
+                {tokenCopied ? (
+                  <>
+                    <CheckIcon className="path__token-icon" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <CopyIcon className="path__token-icon" />
+                    Tap to copy
+                  </>
+                )}
+              </span>
+            </button>
+          </>
+        )}
+
+        <button type="button" className="path__cta-btn" onClick={openCourse}>
+          {tribalToken ? S.courseCtaWithCode : S.courseCta}
+          <ArrowIcon className="path__arrow" />
+        </button>
+      </section>
+
+      <LeadForm sessionId={sessionId} />
+
+      <div className="thanks__share">
+        <h3 className="thanks__share-title">Share your result</h3>
+        <div className="thanks__share-grid">
+          <button className="share-btn" onClick={shareFacebook} type="button">
+            <FacebookIcon className="share-btn__icon" />
+            Facebook
+          </button>
+          <button className="share-btn" onClick={shareWhatsApp} type="button">
+            <WhatsAppIcon className="share-btn__icon" />
+            WhatsApp
+          </button>
+          <button
+            className={`share-btn ${copied ? 'is-copied' : ''}`}
+            onClick={shareCopy}
+            type="button"
+          >
+            {copied ? <CheckIcon className="share-btn__icon" /> : <CopyIcon className="share-btn__icon" />}
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
+          <button className="share-btn" onClick={shareNative} type="button">
+            <ShareIcon className="share-btn__icon" />
+            More
+          </button>
+        </div>
+      </div>
+
+      <div className="thanks__more">
+        <a
+          href={config.workshopEnquiryUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => postEvent({ session_id: sessionId, event_type: 'workshop_click' })}
+        >
+          {S.workshop}
+        </a>
+        <span className="thanks__dot">·</span>
+        <a href={config.scamwatchSubscribeUrl} target="_blank" rel="noopener noreferrer">
+          Subscribe to Scamwatch alerts
+        </a>
+        <span className="thanks__dot">·</span>
+        <a href="#" onClick={(e) => { e.preventDefault(); onRestart(); }}>
+          Retake the challenge
+        </a>
+      </div>
+
+      <details className="sources">
+        <summary className="sources__summary">
+          <span className="sources__chip">Sources</span>
+          <span>Every challenge is based on real reported scams</span>
+        </summary>
+        <p className="sources__intro">{STRINGS.sourcesIntro}</p>
+        <ul className="sources__list">
+          {STRINGS.sources.map((s, i) => (
+            <li key={i}>
+              <a href={s.url} target="_blank" rel="noopener noreferrer">
+                {s.label}
+                <span aria-hidden="true"> ↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  );
+};
+
+export { tierFor, type TierKey };

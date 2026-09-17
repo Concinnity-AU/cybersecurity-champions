@@ -87,9 +87,9 @@ override first, but nothing populates it today — it's a forward-looking hook. 
 |---|---|---|
 | `VITE_API_BASE` | *(empty)* | API base URL. Leave blank — Functions share the SPA's origin. |
 | `VITE_TURNSTILE_SITE_KEY` | `1x00000000000000000000AA` (test) | Public Turnstile site key for the widget. |
-| `VITE_TRIBAL_HABITS_ENROL_URL` | Tribal Habits register URL | Enrolment link on the thank-you screen. Supports a `registration_token` query param. |
-| `VITE_WORKSHOP_ENQUIRY_URL` | `mailto:connect@tims.org.au…` | Workshop enquiry link. |
-| `VITE_SCAMWATCH_SUBSCRIBE_URL` | Scamwatch subscribe URL | "Subscribe to scam alerts" link. |
+| `VITE_TRIBAL_HABITS_ENROL_URL` | Tribal Habits register URL | "Start the free course" button on the result screen (the primary CTA; clicks are recorded as `course_cta_click`). A `registration_token` (or `token`) query param is shown as a copyable registration code. |
+| `VITE_WORKSHOP_ENQUIRY_URL` | `mailto:connect@tims.org.au…` | "Ask about workshops" link on the result screen (clicks recorded as `workshop_click`). |
+| `VITE_SCAMWATCH_SUBSCRIBE_URL` | Scamwatch subscribe URL | "Subscribe to Scamwatch alerts" link on the result screen. |
 | `VITE_PRIMARY_DOMAIN` | `cybersecurity.tims.org.au` | Used for share URL construction client-side. |
 
 ## 5. CI — GitHub Actions
