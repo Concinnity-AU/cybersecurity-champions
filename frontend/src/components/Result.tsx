@@ -1,9 +1,19 @@
 /* Result screen — score first, free course as the primary CTA, then an
-   optional participant sign-up (name + email). Nothing sits between finishing the Challenge
-   and the course. */
+   optional participant sign-up (name + email), then a "challenge them" share
+   block. Nothing sits between finishing the Challenge and the course. */
 
 import { useState } from 'react';
-import { ArrowIcon, CheckIcon, CopyIcon, CrossIcon, FacebookIcon, ShareIcon, WhatsAppIcon } from './Icon';
+import {
+  ArrowIcon,
+  CheckIcon,
+  CopyIcon,
+  CrossIcon,
+  FacebookIcon,
+  LinkedInIcon,
+  ShareIcon,
+  WhatsAppIcon,
+  XIcon,
+} from './Icon';
 import { LeadForm } from './LeadForm';
 import { STRINGS, type TierKey } from '../lib/strings';
 import { config } from '../lib/config';
@@ -96,8 +106,8 @@ export const Result = ({
   onRestart,
 }: ResultProps) => {
   const tier = tierFor(score);
-  const [copied, setCopied] = useState(false);
   const [tokenCopied, setTokenCopied] = useState(false);
+  const [copiedFrom, setCopiedFrom] = useState<'copy' | 'native' | null>(null);
   const tribalToken = tribalHabitsTokenFromUrl(config.tribalHabitsEnrolUrl);
 
   const copyToken = async (): Promise<boolean> => {
@@ -120,44 +130,66 @@ export const Result = ({
     window.open(config.tribalHabitsEnrolUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const trackedShare = (platform: SharePlatform, action?: () => void) => () => {
-    postShare({ session_id: sessionId, platform });
-    action?.();
+  // Each platform gets its own link so a friend who plays can be traced back
+  // to this share — see functions/_shared/share.ts.
+  const linkFor = (platform: SharePlatform): string => {
+    try {
+      const u = new URL(shareUrl);
+      u.searchParams.set('via', platform);
+      return u.toString();
+    } catch {
+      return shareUrl;
+    }
   };
 
-  const shareText = `I scored ${score}/${total} on the Cybersecurity Champions Challenge. Can you beat it?`;
+  const shareText = S.shareText(score, total, tier.title);
+  const popup = (u: string, features = 'noopener,noreferrer') => window.open(u, '_blank', features);
 
-  const shareFacebook = trackedShare('facebook', () => {
-    const u = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-    window.open(u, '_blank', 'noopener,noreferrer,width=600,height=520');
-  });
+  const share = (platform: SharePlatform) => {
+    postShare({ session_id: sessionId, platform });
+    const link = encodeURIComponent(linkFor(platform));
+    const text = encodeURIComponent(shareText);
+    switch (platform) {
+      case 'facebook':
+        popup(`https://www.facebook.com/sharer/sharer.php?u=${link}`, 'noopener,noreferrer,width=600,height=520');
+        break;
+      case 'whatsapp':
+        popup(`https://wa.me/?text=${text}%20${link}`);
+        break;
+      case 'linkedin':
+        popup(`https://www.linkedin.com/sharing/share-offsite/?url=${link}`, 'noopener,noreferrer,width=600,height=620');
+        break;
+      case 'twitter':
+        popup(`https://x.com/intent/tweet?text=${text}&url=${link}`, 'noopener,noreferrer,width=600,height=520');
+        break;
+    }
+  };
 
-  const shareWhatsApp = trackedShare('whatsapp', () => {
-    const u = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
-    window.open(u, '_blank', 'noopener,noreferrer');
-  });
-
-  const shareCopy = trackedShare('copy', async () => {
+  const copyLink = async (button: 'copy' | 'native') => {
+    postShare({ session_id: sessionId, platform: 'copy' });
+    const link = linkFor('copy');
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(link);
+      setCopiedFrom(button);
+      setTimeout(() => setCopiedFrom(null), 2000);
     } catch {
-      window.prompt('Copy your share link:', shareUrl);
+      window.prompt('Copy your share link:', link);
     }
-  });
+  };
 
-  const shareNative = trackedShare('native', () => {
-    if (navigator.share) {
-      navigator
-        .share({ title: 'Cybersecurity Champions Challenge', text: shareText, url: shareUrl })
-        .catch(() => {
-          /* user cancelled — fine */
-        });
-    } else {
-      shareCopy();
+  const shareNative = () => {
+    // No share sheet (most desktop browsers) → copy the link instead.
+    if (!navigator.share) {
+      void copyLink('native');
+      return;
     }
-  });
+    postShare({ session_id: sessionId, platform: 'native' });
+    navigator
+      .share({ title: 'Cybersecurity Champions Challenge', text: shareText, url: linkFor('native') })
+      .catch(() => {
+        /* user cancelled — fine */
+      });
+  };
 
   return (
     <div className="screen thanks">
@@ -226,31 +258,49 @@ export const Result = ({
 
       <LeadForm sessionId={sessionId} />
 
-      <div className="thanks__share">
-        <h3 className="thanks__share-title">Share your result</h3>
+      <section className="thanks__share" aria-labelledby="share-title">
+        <p className="thanks__share-score">{S.shareScore(score, total, tier.title)}</p>
+        <h3 className="thanks__share-title" id="share-title">
+          {S.shareTitle} <span className="thanks__share-cta">{S.shareCta}</span>
+        </h3>
         <div className="thanks__share-grid">
-          <button className="share-btn" onClick={shareFacebook} type="button">
+          <button className="share-btn" onClick={() => share('facebook')} type="button">
             <FacebookIcon className="share-btn__icon" />
             Facebook
           </button>
-          <button className="share-btn" onClick={shareWhatsApp} type="button">
+          <button className="share-btn" onClick={() => share('whatsapp')} type="button">
             <WhatsAppIcon className="share-btn__icon" />
             WhatsApp
           </button>
+          <button className="share-btn" onClick={() => share('linkedin')} type="button">
+            <LinkedInIcon className="share-btn__icon" />
+            LinkedIn
+          </button>
           <button
-            className={`share-btn ${copied ? 'is-copied' : ''}`}
-            onClick={shareCopy}
+            className={`share-btn ${copiedFrom === 'native' ? 'is-copied' : ''}`}
+            onClick={shareNative}
             type="button"
           >
-            {copied ? <CheckIcon className="share-btn__icon" /> : <CopyIcon className="share-btn__icon" />}
-            {copied ? 'Copied!' : 'Copy link'}
-          </button>
-          <button className="share-btn" onClick={shareNative} type="button">
-            <ShareIcon className="share-btn__icon" />
-            More
+            {copiedFrom === 'native' ? <CheckIcon className="share-btn__icon" /> : <ShareIcon className="share-btn__icon" />}
+            {copiedFrom === 'native' ? S.shareCopied : S.shareNative}
           </button>
         </div>
-      </div>
+        <div className="thanks__share-more">
+          <button
+            className={`share-link ${copiedFrom === 'copy' ? 'is-copied' : ''}`}
+            onClick={() => copyLink('copy')}
+            type="button"
+          >
+            {copiedFrom === 'copy' ? <CheckIcon className="share-link__icon" /> : <CopyIcon className="share-link__icon" />}
+            {copiedFrom === 'copy' ? S.shareCopied : S.shareCopy}
+          </button>
+          <span className="thanks__dot" aria-hidden="true">·</span>
+          <button className="share-link" onClick={() => share('twitter')} type="button">
+            <XIcon className="share-link__icon" />
+            {S.shareX}
+          </button>
+        </div>
+      </section>
 
       <div className="thanks__more">
         <a

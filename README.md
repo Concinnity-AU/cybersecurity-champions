@@ -94,7 +94,8 @@ Single Cloudflare Pages project. The static SPA *and* the API/landing/OG routes 
 ├── migrations/
 │   ├── 0001_initial.sql       # schema
 │   ├── 0002_seed_challenges.sql  # 15 seed challenges with en translations
-│   └── 0003_attribution_and_funnel.sql  # sessions + events tables, lead attribution columns
+│   ├── 0003_attribution_and_funnel.sql  # sessions + events tables, lead attribution columns
+│   └── 0004_share_referrals.sql         # sessions.shared_by (participant share referrals)
 ├── embed/
 │   ├── embed.js               # drop-in script (alternative installation)
 │   └── EMBED_SNIPPET.html     # ★ copy-paste this into Squarespace
@@ -261,6 +262,7 @@ cd frontend
 npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0001_initial.sql
 npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0002_seed_challenges.sql
 npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0003_attribution_and_funnel.sql
+npx wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0004_share_referrals.sql
 ```
 
 Each file is applied **once**. On an existing database apply only the new file,
@@ -312,13 +314,16 @@ The result screen shows the score straight away — nothing is gated behind the 
 
 | Stage | Recorded by | Table |
 |---|---|---|
-| Started | `POST /api/start`, when the challenge set loads | `sessions` — one row per attempt, with first-touch UTMs + referrer hostname |
+| Started | `POST /api/start`, when the challenge set loads | `sessions` — one row per attempt, with first-touch UTMs + referrer hostname (+ `shared_by` for share referrals) |
 | Completed | `POST /api/complete` | `completions` |
 | Course CTA click | `POST /api/event` (`course_cta_click`) | `events` |
 | Workshop link click | `POST /api/event` (`workshop_click`) | `events` |
 | Left name + email | `POST /api/lead` — a separate measure, not a funnel gate | `leads` |
+| Shared | `POST /api/share` — Facebook, WhatsApp, LinkedIn, device share sheet, copy link, X | `shares` |
 
 Everything joins on `session_id`, so every stage can be broken down by `utm_source` / `utm_medium` / `utm_campaign` / `utm_content`. A retake is a new session. Course enrolment happens on Tribal Habits and isn't visible to us — the course CTA click is the last step we can measure.
+
+**Share referrals.** Below the course and the form, the result screen asks the player to challenge someone they know. Each platform gets its own link (`/r/<session_id>?via=<platform>`). The share landing page sends the friend to `/?utm_source=<platform>&utm_medium=share&utm_campaign=participant_share&shared_by=<session_id>`. Participant sharing therefore shows up as its own source (`medium = share`), separate from paid, owned and partner traffic. `sessions.shared_by` links each referred session back to the sharer's session and the campaign that brought the sharer in.
 
 Concinnity Studio (the internal dashboard) shows the funnel and a by-source breakdown; SQL equivalents are in [How-to: Export and manage leads](docs/how-to/export-and-manage-leads.md).
 

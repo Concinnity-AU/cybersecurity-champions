@@ -1,11 +1,12 @@
 /* POST /api/share — records a share event for analytics. */
 
 import { z } from 'zod';
+import { SHARE_PLATFORMS } from '../_shared/share';
 import type { Env } from '../_shared/types';
 
 const Schema = z.object({
   session_id: z.string().uuid(),
-  platform: z.enum(['facebook', 'whatsapp', 'copy', 'native', 'twitter']),
+  platform: z.enum(SHARE_PLATFORMS),
 });
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {

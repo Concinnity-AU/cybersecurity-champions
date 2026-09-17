@@ -8,6 +8,9 @@
    the embed snippet copies them onto the iframe src, plus `ref` — the parent's
    referrer hostname. See embed/EMBED_SNIPPET.html.
 
+   Participant share links (via /r/<session_id>) arrive with share UTMs plus
+   `shared_by` — the sharer's session id — so a referral chain can be followed.
+
    Only hostnames are kept for referrers — never paths or query strings. */
 
 import { isEmbedded } from './config';
@@ -22,7 +25,10 @@ const EMPTY: Attribution = {
   utm_campaign: null,
   utm_content: null,
   referrer: null,
+  shared_by: null,
 };
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 let cached: Attribution | null = null;
 
@@ -46,6 +52,8 @@ function fromUrl(): Attribution {
   const out: Attribution = { ...EMPTY };
   for (const k of UTM_KEYS) out[k] = clip(p.get(k));
   out.referrer = hostOf(isEmbedded ? p.get('ref') ?? document.referrer : document.referrer);
+  const sharedBy = p.get('shared_by');
+  out.shared_by = sharedBy && UUID_RE.test(sharedBy) ? sharedBy.toLowerCase() : null;
   return out;
 }
 

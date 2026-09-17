@@ -12,9 +12,9 @@
     "deploy": "npm run build && wrangler pages deploy dist --project-name=cybersecurity-champions-frontend",
     "typecheck": "tsc --noEmit",
     "db:create": "wrangler d1 create cybersecurity-champions-db",
-    "db:local:init": "wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0001_initial.sql && wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0002_seed_challenges.sql && wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0003_attribution_and_funnel.sql",
+    "db:local:init": "wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0001_initial.sql && wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0002_seed_challenges.sql && wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0003_attribution_and_funnel.sql && wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0004_share_referrals.sql",
     "db:local:reset": "wrangler d1 execute cybersecurity-champions-db --local --command=\"DROP TABLE IF EXISTS events; DROP TABLE IF EXISTS sessions; DROP TABLE IF EXISTS shares; DROP TABLE IF EXISTS completions; DROP TABLE IF EXISTS leads; DROP TABLE IF EXISTS challenge_translations; DROP TABLE IF EXISTS challenges;\" && npm run db:local:init",
-    "db:remote:init": "wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0001_initial.sql && wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0002_seed_challenges.sql && wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0003_attribution_and_funnel.sql"
+    "db:remote:init": "wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0001_initial.sql && wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0002_seed_challenges.sql && wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0003_attribution_and_funnel.sql && wrangler d1 execute cybersecurity-champions-db --remote --file=../migrations/0004_share_referrals.sql"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",

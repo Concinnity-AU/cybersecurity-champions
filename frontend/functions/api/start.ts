@@ -1,5 +1,6 @@
 /* POST /api/start — records a challenge start (funnel stage 1) with its
-   first-touch attribution. Idempotent per session_id. */
+   first-touch attribution, plus the sharer's session when the visitor arrived
+   through a participant share link. Idempotent per session_id. */
 
 import { z } from 'zod';
 import { AttributionSchema } from '../_shared/attribution';
@@ -9,6 +10,8 @@ const Schema = AttributionSchema.extend({
   session_id: z.string().uuid(),
   embedded: z.boolean().default(false),
   language: z.string().min(2).max(8).default('en'),
+  // A malformed referral shouldn't cost us the start itself — drop it instead.
+  shared_by: z.string().uuid().nullable().optional().catch(null),
 });
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
@@ -25,8 +28,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   await env.DB
     .prepare(
       `INSERT OR IGNORE INTO sessions
-         (session_id, utm_source, utm_medium, utm_campaign, utm_content, referrer, embedded, language)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         (session_id, utm_source, utm_medium, utm_campaign, utm_content, referrer, embedded, language,
+          shared_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       d.session_id,
@@ -37,6 +41,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       d.referrer,
       d.embedded ? 1 : 0,
       d.language,
+      d.shared_by && d.shared_by !== d.session_id ? d.shared_by : null,
     )
     .run();
 

@@ -106,6 +106,48 @@ npx wrangler d1 execute cybersecurity-champions-db --remote \
 `course_clicks` is the last stage we can measure. Swap `'course_cta_click'` for
 `'workshop_click'` to count workshop-link clicks instead.
 
+Participant shares show up here as `medium = share`,
+`campaign = participant_share`, with the share platform as `source`.
+
+## Share referrals
+
+A share link carries the sharer's session, so a visitor who arrives through it
+has `sessions.shared_by` set (from migration `0004`). That lets you follow a
+chain: *Facebook campaign → participant scores 7/10 → shares to WhatsApp →
+friend completes*.
+
+```sh
+# what each sharer's share links brought in, by the sharer's own source
+npx wrangler d1 execute cybersecurity-champions-db --remote \n  --command="SELECT COALESCE(a.utm_source, a.referrer, '(direct)') AS sharer_source,
+                    a.utm_campaign AS sharer_campaign,
+                    f.utm_source AS shared_via,
+                    count(DISTINCT f.session_id) AS referred_started,
+                    count(DISTINCT c.session_id) AS referred_completed,
+                    count(DISTINCT e.session_id) AS referred_course_clicks
+               FROM sessions f
+               JOIN sessions a ON a.session_id = f.shared_by
+               LEFT JOIN completions c ON c.session_id = f.session_id
+               LEFT JOIN events e ON e.session_id = f.session_id
+                                 AND e.event_type = 'course_cta_click'
+              GROUP BY 1, 2, 3
+              ORDER BY referred_started DESC;"
+
+# share clicks vs. people they actually brought in, per platform
+npx wrangler d1 execute cybersecurity-champions-db --remote \n  --command="SELECT p.platform, p.share_clicks,
+                    count(DISTINCT f.session_id) AS referred_started,
+                    count(DISTINCT c.session_id) AS referred_completed
+               FROM (SELECT platform, count(*) AS share_clicks FROM shares GROUP BY platform) p
+               LEFT JOIN sessions f ON f.shared_by IS NOT NULL AND f.utm_source = p.platform
+               LEFT JOIN completions c ON c.session_id = f.session_id
+              GROUP BY p.platform, p.share_clicks
+              ORDER BY referred_started DESC;"
+```
+
+The `a` join only walks one step back. A referred visitor who shares again
+starts a new link in the chain, so repeat the join to go further. A sharer
+who opens their own link counts as a referral: there is nothing in the data to
+tell them apart.
+
 ## Deleting a lead (right-to-erasure request)
 
 If someone asks to be removed:
