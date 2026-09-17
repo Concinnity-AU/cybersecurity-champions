@@ -31,15 +31,16 @@ copies them onto the iframe `src`:
   (omitted when it's the TIMS site itself).
 
 For example, a visitor arriving from Facebook at
-`https://tims.org.au/cybersecurity?utm_source=tims&utm_medium=facebook&utm_campaign=sept-course&utm_content=abc123`
+`https://tims.org.au/cybersecurity?utm_source=facebook&utm_medium=paid_social&utm_campaign=sept-course&utm_content=abc123`
 gets an iframe at
-`https://cybersecurity.tims.org.au/?embed=1&utm_source=tims&utm_medium=facebook&utm_campaign=sept-course&utm_content=abc123&ref=l.facebook.com`.
+`https://cybersecurity.tims.org.au/?embed=1&utm_source=facebook&utm_medium=paid_social&utm_campaign=sept-course&utm_content=abc123&ref=l.facebook.com`.
 The app (`frontend/src/lib/attribution.ts`) reads those and records them with
 the session (`/api/start`) and any sign-up (`/api/lead`).
 
 Campaign links should therefore point at the TIMS page (or the standalone quiz
 URL, `https://cybersecurity.tims.org.au/`) with UTMs, e.g.
-`?utm_source=tims&utm_medium=facebook&utm_campaign=sept-course&utm_content=<publer creative id>`.
+`?utm_source=facebook&utm_medium=paid_social&utm_campaign=sept-course&utm_content=<publer creative id>`.
+See [UTM conventions](../../README.md#utm-conventions) for the values to use.
 
 > **Re-paste required.** Snippets pasted before attribution forwarding was added
 > load a bare `/?embed=1`, so embedded traffic arrives with **no** UTMs and can't

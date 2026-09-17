@@ -278,7 +278,7 @@ and apply it **before** deploying code that depends on it — see
 
 The embed sets a `sandbox` attribute with the minimum permissions needed. The postMessage origin check is locked to `https://cybersecurity.tims.org.au`.
 
-The snippet also forwards the host page's `utm_*` parameters and the visitor's referring hostname (`ref`) onto the iframe `src`, so embedded traffic is attributed to its campaign. Point campaign links at the TIMS page (or the standalone URL) with UTMs, e.g. `https://tims.org.au/cybersecurity?utm_source=tims&utm_medium=facebook&utm_campaign=sept-course&utm_content=<publer creative id>`. If the Code Block was pasted before attribution forwarding was added, re-paste it — see [How-to: Update the embed](docs/how-to/update-the-embed.md).
+The snippet also forwards the host page's `utm_*` parameters and the visitor's referring hostname (`ref`) onto the iframe `src`, so embedded traffic is attributed to its campaign. Point campaign links at the TIMS page (or the standalone URL) with UTMs, e.g. `https://tims.org.au/cybersecurity?utm_source=facebook&utm_medium=paid_social&utm_campaign=sept-course&utm_content=<publer creative id>` (see [UTM conventions](#utm-conventions)). If the Code Block was pasted before attribution forwarding was added, re-paste it — see [How-to: Update the embed](docs/how-to/update-the-embed.md).
 
 ## Content management
 
@@ -324,6 +324,19 @@ The result screen shows the score straight away — nothing is gated behind the 
 Everything joins on `session_id`, so every stage can be broken down by `utm_source` / `utm_medium` / `utm_campaign` / `utm_content`. A retake is a new session. Course enrolment happens on Tribal Habits and isn't visible to us — the course CTA click is the last step we can measure.
 
 **Share referrals.** Below the course and the form, the result screen asks the player to challenge someone they know. Each platform gets its own link (`/r/<session_id>?via=<platform>`). The share landing page sends the friend to `/?utm_source=<platform>&utm_medium=share&utm_campaign=participant_share&shared_by=<session_id>`. Participant sharing therefore shows up as its own source (`medium = share`), separate from paid, owned and partner traffic. `sessions.shared_by` links each referred session back to the sharer's session and the campaign that brought the sharer in.
+
+### UTM conventions
+
+Tag every campaign link the same way, so Studio can separate paid, owned, partner and participant-generated traffic:
+
+| Parameter | Holds | Examples |
+|---|---|---|
+| `utm_source` | The platform or partner | `facebook`, `instagram`, `linkedin`, `tims`, a partner's name |
+| `utm_medium` | The type of traffic | `paid_social`, `organic_social`, `partner`, `email`, `print` |
+| `utm_campaign` | The campaign | `sept-course` |
+| `utm_content` | The creative (e.g. Publer ID), kept verbatim | `abc123` |
+
+`utm_medium=share` and `utm_campaign=participant_share` are set automatically on participant share links — don't use them on campaign links. Source, medium and campaign are lower-cased on the way in.
 
 Concinnity Studio (the internal dashboard) shows the funnel and a by-source breakdown; SQL equivalents are in [How-to: Export and manage leads](docs/how-to/export-and-manage-leads.md).
 
