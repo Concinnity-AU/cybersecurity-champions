@@ -139,7 +139,8 @@ export const onRequestGet: PagesFunction<Env, 'session_id'> = async ({ params, e
         <path d="M5 12h14m-6-6 6 6-6 6" />
       </svg>
     </a>
-    <p class="foot">A free community program by TIMS &amp; Concinnity · <a href="${esc(challengeUrl)}">${esc(primary)}</a></p>
+    <p class="foot">A free community program by TIMS &amp; Concinnity · <a href="${esc(challengeUrl)}">${esc(primary)}</a><br />
+      Supported by the Australian Government through the Department of Home Affairs.</p>
   </main>
 </body>
 </html>`;

@@ -137,6 +137,22 @@ export const LeadForm = ({ sessionId }: { sessionId: string }) => {
         {!submitting && <ArrowIcon className="btn__icon" />}
       </button>
       <p className="lead__fine">{S.leadFine}</p>
+
+      <details className="lead__privacy">
+        <summary>{S.privacyTitle}</summary>
+        <ul>
+          {S.privacyPoints.map((p, i) => (
+            <li key={i}>{p}</li>
+          ))}
+        </ul>
+        <p>
+          {S.privacyContact}{' '}
+          <a href="https://www.oaic.gov.au/" target="_blank" rel="noopener noreferrer">
+            oaic.gov.au
+          </a>
+          .
+        </p>
+      </details>
     </form>
   );
 };

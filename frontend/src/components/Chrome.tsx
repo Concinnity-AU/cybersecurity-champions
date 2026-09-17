@@ -59,6 +59,7 @@ export const Footer = () => (
         <span className="ftr__logo-text" style={{ fontFamily: 'Comfortaa' }}>Concinnity</span>
       </div>
     </div>
+    <p className="ftr__ack">{STRINGS.fundingAck}</p>
   </footer>
 );
 
