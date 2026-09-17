@@ -62,6 +62,25 @@ earlier "updates and resources" wording; that consent is not acted on.
 > accept optional `phone` and `postcode`, but the current form collects neither.
 > Older leads may have a phone number.
 
+## Collection notice and funding acknowledgement
+
+The program is funded under a Department of Home Affairs grant agreement, which
+requires TIMS to comply with the Privacy Act 1988 (clause 14) and to
+acknowledge the Commonwealth's support in all published material (clause 3.2).
+
+- **Collection notice (APP 5):** an expandable "How TIMS handles your details"
+  panel under the participant form says who collects the details and why, that
+  they may be included in reports to Home Affairs, that giving them is optional,
+  where they're stored (Concinnity, on Cloudflare, possibly offshore), what is
+  recorded anonymously, and how to seek access, correction or make a complaint
+  (connect@tims.org.au, then the OAIC). TIMS has no public privacy policy to
+  link to; if one is published, link it from this panel. Copy lives in
+  `STRINGS.result.privacy*` in `frontend/src/lib/strings.ts`.
+- **Acknowledgement:** "Supported by the Australian Government through the
+  Department of Home Affairs." appears in the app footer (`STRINGS.fundingAck`),
+  on the `/r/:session_id` share page, and on the `/og/:session_id.png` share
+  image. Home Affairs has not prescribed wording; update all three if it does.
+
 ## Data residency & retention
 
 - Data lives in **Cloudflare D1** in Concinnity's account. There's no automated

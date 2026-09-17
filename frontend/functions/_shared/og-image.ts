@@ -262,6 +262,12 @@ function buildTree(input: OgInputResolved) {
           el('div', { style: { color: TIMS_GOLD, fontWeight: 800 } }, domain),
         ],
       ),
+      // Grant agreement clause 3.2 — acknowledge the Commonwealth's support.
+      el(
+        'div',
+        { style: { display: 'flex', marginTop: '10px', fontSize: '18px', fontWeight: 400, color: INK_DIM } },
+        'Supported by the Australian Government through the Department of Home Affairs',
+      ),
     ],
   );
 }

@@ -1051,6 +1051,17 @@ html.is-embed .cc-shell {
 .ftr__logo--concinnity img { height: 22px; }
 .ftr__logo-text { color: var(--ink); font-weight: 700; font-size: 13px; }
 .ftr__sep { color: var(--ink-3); opacity: .5; }
+.ftr__ack { margin: 2px 0 0; max-width: 42ch; line-height: 1.4; color: var(--ink-2); }
+
+/* Collection notice under the participant form */
+.lead__privacy { font-size: 12px; color: var(--ink-2); }
+.lead__privacy summary {
+  cursor: pointer; font-weight: 700; color: var(--tims-purple);
+  text-align: center; min-height: 44px; display: flex; align-items: center; justify-content: center;
+}
+.lead__privacy ul { margin: 4px 0 8px; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; line-height: 1.45; }
+.lead__privacy p { margin: 0; line-height: 1.45; }
+.lead__privacy a { color: var(--tims-purple); font-weight: 600; }
 
 /* v2 additions */
 .prompt__text--inline { margin-top: -4px; margin-bottom: 4px; }

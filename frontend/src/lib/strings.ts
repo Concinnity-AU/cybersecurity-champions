@@ -1,6 +1,9 @@
 /* User-facing strings, keyed for future translation. */
 
 export const STRINGS = {
+  // Grant agreement clause 3.2: acknowledge the Commonwealth's support in all
+  // published material. Home Affairs hasn't prescribed a form of words.
+  fundingAck: 'Supported by the Australian Government through the Department of Home Affairs.',
   welcomeKicker: 'TIMS × Concinnity · FREE Program',
   welcomeBody:
     'Ten quick challenges. Real scams reported to Scamwatch, ASD and the NASC. About 90 seconds — no sign-up needed to play.',
@@ -63,6 +66,17 @@ export const STRINGS = {
     leadSubmit: 'Record my participation',
     leadFine: 'Only used to record your participation. No newsletters or marketing emails.',
     leadDone: (name: string) => `Thanks, ${name} — you're recorded as a participant.`,
+    // Collection notice (Privacy Act, APP 5) — grant agreement clause 14.
+    privacyTitle: 'How TIMS handles your details',
+    privacyPoints: [
+      'Toowoomba International Multicultural Society Inc. (TIMS) collects your first name and email to record you as a participant in the Cybersecurity Champions program.',
+      'The program is funded by the Australian Government through the Department of Home Affairs. Participant information may be included in the reports TIMS provides to the Department.',
+      "Giving your details is optional — you can do the Challenge and the free course without them. We won't send you newsletters or marketing, and we won't sell or share your details with anyone else unless the law requires it.",
+      'Your details are stored securely for TIMS by its technology partner, Concinnity, using Cloudflare, which may process data outside Australia.',
+      'Separately, the Challenge records your score, answers and the link or website that brought you here, without your name, to help TIMS understand how the program is going.',
+    ],
+    privacyContact:
+      'To access or correct your details, or to make a complaint, email connect@tims.org.au. If you’re not satisfied with our response, you can contact the Office of the Australian Information Commissioner at',
     workshop: 'Prefer in person? Ask about workshops',
   },
   sourcesIntro:
