@@ -1,12 +1,13 @@
 # Explanation: Security
 
-The app is a public, no-login lead magnet, so the security surface is small but
+The app is a public, no-login awareness quiz, so the security surface is small but
 deliberate. This explains the controls in place and the reasoning behind them.
 
 ## Threat model in brief
 
-There are no user accounts, sessions, or privileged actions — nothing to take
-over. The realistic risks are:
+There are no user accounts, login sessions, or privileged actions — nothing to
+take over. (The `sessions` table records anonymous quiz attempts, not logins.)
+The realistic risks are:
 
 1. **Spam / bot lead submissions** polluting the leads list.
 2. **Abuse of the embed** (someone framing the app from a hostile origin to
@@ -29,9 +30,11 @@ The verifier fails **closed**: missing token, missing secret, non-200 from
 siteverify, or a thrown error all return `false`. Warnings are logged (tail them
 per [How-to: Monitor and debug](../how-to/monitor-and-debug.md)).
 
-The other write endpoints (`/api/complete`, `/api/share`) are unauthenticated
-because they store no PII and the worst case is junk anonymous rows — not worth
-adding friction (a Turnstile challenge) to every completion.
+The other write endpoints (`/api/start`, `/api/complete`, `/api/event`,
+`/api/share`) are unauthenticated because they store no PII and the worst case
+is junk anonymous rows (inflated analytics) — not worth adding friction (a
+Turnstile challenge) to every start or click. `/api/event` and `/api/share` only
+write when a matching session/completion already exists.
 
 ## CORS — explicit allowlist, no wildcards
 
@@ -76,15 +79,16 @@ properties — preventing clickjacking via embedding elsewhere.
 
 Every write endpoint validates its body with **Zod** before touching the
 database, with tight constraints: UUID session IDs, bounded integers, an email
-format, a phone regex, a 4-digit AU postcode, a fixed `platform` enum, and length
-caps on free-text and UTM fields. Invalid input returns `400` with the issue
-list; nothing unvalidated reaches a SQL bind. All queries use **parameterised
+format, a phone regex, a 4-digit AU postcode, fixed `platform` and `event_type`
+enums, a bare-hostname pattern for `referrer`, and length caps on free-text and
+UTM fields. Invalid input returns `400`; nothing unvalidated reaches a SQL bind. All queries use **parameterised
 binds** (`.bind(...)`), so there's no string-interpolated SQL.
 
 ## Consent gating
 
 `/api/lead` rejects (`400`) unless `consent_program` is `true`. Marketing consent
-is a separate boolean defaulting to `false`. See
+is a separate boolean defaulting to `false` (the current form sends `true` for
+both from its single checkbox). See
 [Explanation: Privacy and data](privacy-and-data.md).
 
 ## Secrets handling

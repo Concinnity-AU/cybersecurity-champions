@@ -95,8 +95,10 @@ Paste the **secret key** when prompted.
 npm run db:remote:init
 ```
 
-This applies the schema and seed challenges to the remote D1. After this,
-`/api/challenges` returns data.
+This applies the schema, seed challenges and the attribution/funnel tables
+(`0001`–`0003`) to the remote D1. After this, `/api/challenges` returns data.
+Run it once, on the new empty database only — later migrations are applied one
+file at a time (see [How-to: Run migrations](../how-to/run-migrations.md)).
 
 ### 7. Attach the custom domain (cross-DNS — the tricky bit)
 

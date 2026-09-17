@@ -1,10 +1,13 @@
-/* POST /api/lead — captures a lead and links to the completion via session_id. */
+/* POST /api/lead — captures an optional "updates and resources" sign-up.
+   Stored with its session_id and attribution, and linked to the completion
+   (if any). A lead is a separate measure from a completion, not a gate. */
 
 import { z } from 'zod';
+import { AttributionSchema } from '../_shared/attribution';
 import { verifyTurnstile } from '../_shared/turnstile';
 import type { Env } from '../_shared/types';
 
-const Schema = z.object({
+const Schema = AttributionSchema.extend({
   session_id: z.string().uuid(),
   first_name: z.string().trim().min(1).max(100),
   email: z.string().trim().email().max(254),
@@ -26,9 +29,6 @@ const Schema = z.object({
   consent_program: z.boolean(),
   consent_marketing: z.boolean().default(false),
   turnstile_token: z.string().min(1),
-  utm_source: z.string().max(120).nullable().optional(),
-  utm_medium: z.string().max(120).nullable().optional(),
-  utm_campaign: z.string().max(120).nullable().optional(),
 });
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
@@ -56,20 +56,23 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const ins = await env.DB
     .prepare(
       `INSERT INTO leads
-         (first_name, email, phone, postcode, language, consent_program, consent_marketing,
-          utm_source, utm_medium, utm_campaign)
-       VALUES (?, ?, ?, ?, 'en', ?, ?, ?, ?, ?)`,
+         (session_id, first_name, email, phone, postcode, language, consent_program,
+          consent_marketing, utm_source, utm_medium, utm_campaign, utm_content, referrer)
+       VALUES (?, ?, ?, ?, ?, 'en', ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
+      data.session_id,
       data.first_name,
       data.email,
       data.phone ?? null,
       data.postcode ?? null,
       data.consent_program ? 1 : 0,
       data.consent_marketing ? 1 : 0,
-      data.utm_source ?? null,
-      data.utm_medium ?? null,
-      data.utm_campaign ?? null,
+      data.utm_source,
+      data.utm_medium,
+      data.utm_campaign,
+      data.utm_content,
+      data.referrer,
     )
     .run();
   const leadId = Number(ins.meta.last_row_id);

@@ -35,8 +35,36 @@ export const STRINGS = {
     { min: 0, key: 'learner', title: 'Cyber Learner', blurb: 'A great start — every Champion begins right here.', color: 'var(--accent-orange)' },
     { min: 4, key: 'aware', title: 'Cyber Aware', blurb: "You spot most tricks. A little polish and you're a Defender.", color: 'var(--accent-gold)' },
     { min: 7, key: 'defender', title: 'Cyber Defender', blurb: 'Strong instincts — your family is safer with you watching.', color: 'var(--accent-green)' },
-    { min: 9, key: 'champion', title: 'Cyber Champion', blurb: 'Outstanding. Come and teach this to your community.', color: '#FFA51C' },
+    { min: 9, key: 'champion', title: 'Cyber Champion', blurb: 'Outstanding — you know the tricks scammers rely on.', color: '#FFA51C' },
   ] as const,
+  // Result screen: score first, free course as the primary CTA, sign-up optional.
+  result: {
+    kicker: 'Challenge complete',
+    scored: (score: number, total: number) => `You scored ${score}/${total}`,
+    courseKicker: 'FREE online course',
+    courseTitle: 'Build your cyber skills',
+    // Bridge from the score to the course, keyed by tier band.
+    courseBridge: {
+      high: 'Great result. Take the free course to build on what you already know.',
+      mid: "Think you're cyber safe? There may be more to learn. Take the free Cybersecurity Champions course.",
+      low: 'A few simple changes can make a big difference. Start the free course.',
+    },
+    courseBody:
+      'Four short self-paced modules on Tribal Habits — 4–8 hours in total, on any device. Start whenever suits.',
+    courseTokenInstr: 'When you register, Tribal Habits will ask for a code. Use this one:',
+    courseCta: 'Start the free course',
+    courseCtaWithCode: 'Copy code & start the free course',
+    leadKicker: 'Optional',
+    leadTitle: 'Want cybersecurity updates and resources?',
+    leadBody:
+      'Leave your details and TIMS will email you practical scam alerts, tips and news about the free program.',
+    leadConsent:
+      "I'd like TIMS to email me cybersecurity updates, resources and news about the free Cybersecurity Champions program.",
+    leadSubmit: 'Send me updates',
+    leadFine: "We'll never share your details. You can opt out any time.",
+    leadDone: (name: string) => `Thanks, ${name} — you're on the list.`,
+    workshop: 'Prefer in person? Ask about workshops',
+  },
   sourcesIntro:
     'Every scenario in this challenge is based on real scams reported to Australian authorities.',
   sources: [

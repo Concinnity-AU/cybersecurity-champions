@@ -48,9 +48,14 @@ means.
 npm run db:local:init
 ```
 
-This applies the schema (`migrations/0001_initial.sql`) and the seed challenges
-(`migrations/0002_seed_challenges.sql`) to a local SQLite file that wrangler
-manages under `.wrangler/`.
+This applies the schema (`migrations/0001_initial.sql`), the seed challenges
+(`migrations/0002_seed_challenges.sql`) and the attribution/funnel tables
+(`migrations/0003_attribution_and_funnel.sql`) to a local SQLite file that
+wrangler manages under `.wrangler/`.
+
+> Already have a local database from before `0003`? Either run
+> `npm run db:local:reset`, or apply just the new file:
+> `npx wrangler d1 execute cybersecurity-champions-db --local --file=../migrations/0003_attribution_and_funnel.sql`.
 
 ### 4. Start the dev server
 
@@ -73,6 +78,24 @@ up by wrangler automatically.
 - `http://localhost:8788` → the welcome screen loads.
 - `http://localhost:8788/api/health` → `{"ok":true}`.
 - Click **Start** → ten challenges load (this confirms D1 + the seed worked).
+- Finish the challenge → the result screen shows your score straight away, with
+  the free-course button and the optional updates sign-up below it.
+
+### Test campaign attribution
+
+Open the app with UTMs, e.g.
+`http://localhost:8788/?utm_source=test&utm_medium=local&utm_campaign=dev`, play
+through, click the course button, then check what was recorded:
+
+```sh
+npx wrangler d1 execute cybersecurity-champions-db --local \
+  --command="SELECT s.session_id, s.utm_source, s.utm_campaign, e.event_type
+               FROM sessions s LEFT JOIN events e ON e.session_id = s.session_id
+              ORDER BY s.started_at DESC LIMIT 5;"
+```
+
+Attribution is cached per browser tab (`sessionStorage`), so use a new tab when
+testing different values without UTMs.
 
 ## Common next tasks
 
@@ -84,7 +107,7 @@ If you change migrations or want a clean slate:
 npm run db:local:reset
 ```
 
-This drops every table and re-runs the schema + seed.
+This drops every table and re-runs all three migration files.
 
 ### Test the share page and OG image locally
 

@@ -82,14 +82,19 @@ it can and tops up from the rest of the pool rather than failing.
 
 1. SPA calls `GET /api/challenges?count=10` → gets a `session_id` + ordered
    challenges (with answers + explanations for instant client-side feedback).
-2. User answers; the SPA tracks score, streak, and a per-question answer log
+2. SPA fires `POST /api/start` with the session and campaign attribution →
+   server records the start in `sessions`.
+3. User answers; the SPA tracks score, streak, and a per-question answer log
    (`App.tsx`).
-3. On the last question, SPA calls `POST /api/complete` with the session,
+4. On the last question, SPA calls `POST /api/complete` with the session,
    score, and answer log → server stores the completion and returns the tier +
-   share/OG URLs.
-4. Optionally, the user submits the lead form → `POST /api/lead` (Turnstile
-   verified) → links the lead to the completion.
-5. Sharing fires `POST /api/share` per platform.
+   share/OG URLs. The result screen shows the score immediately.
+5. Clicking the free-course button (or the workshops link) fires
+   `POST /api/event`.
+6. Optionally, the user signs up for updates → `POST /api/lead` (Turnstile
+   verified) → stores the lead with its session and attribution, and links it
+   to the completion.
+7. Sharing fires `POST /api/share` per platform.
 
 See [Explanation: Architecture](../explanation/architecture.md) for the request
 diagram and [Reference: API](api.md) for endpoint details.

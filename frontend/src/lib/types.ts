@@ -113,7 +113,30 @@ export interface CompletePayload {
   language: string;
 }
 
-export interface LeadPayload {
+export interface Attribution {
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  /** Creative identifier, e.g. passed through from Publer. */
+  utm_content: string | null;
+  /** Referring hostname only. */
+  referrer: string | null;
+}
+
+export interface StartPayload extends Attribution {
+  session_id: string;
+  embedded: boolean;
+  language: string;
+}
+
+export type FunnelEventType = 'course_cta_click' | 'workshop_click';
+
+export interface EventPayload {
+  session_id: string;
+  event_type: FunnelEventType;
+}
+
+export interface LeadPayload extends Attribution {
   session_id: string;
   first_name: string;
   email: string;
@@ -121,9 +144,6 @@ export interface LeadPayload {
   consent_program: boolean;
   consent_marketing: boolean;
   turnstile_token: string;
-  utm_source: string | null;
-  utm_medium: string | null;
-  utm_campaign: string | null;
 }
 
 export interface LeadResponse {

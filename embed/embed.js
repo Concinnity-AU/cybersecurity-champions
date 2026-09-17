@@ -15,9 +15,31 @@
   'use strict';
 
   var EMBED_ORIGIN = 'https://cybersecurity.tims.org.au';
-  var EMBED_URL = EMBED_ORIGIN + '/?embed=1';
   var INITIAL_HEIGHT = 720;
   var MIN_HEIGHT = 400;
+  var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+
+  // The iframe can't see this page's URL, so forward campaign attribution:
+  // this page's UTMs, plus `ref` = the hostname that referred the visitor here.
+  function embedUrl() {
+    var params = ['embed=1'];
+    try {
+      var here = new URLSearchParams(window.location.search);
+      for (var i = 0; i < UTM_KEYS.length; i++) {
+        var v = here.get(UTM_KEYS[i]);
+        if (v) params.push(UTM_KEYS[i] + '=' + encodeURIComponent(v.slice(0, 120)));
+      }
+      if (document.referrer) {
+        var refHost = new URL(document.referrer).hostname;
+        if (refHost && refHost !== window.location.hostname) {
+          params.push('ref=' + encodeURIComponent(refHost));
+        }
+      }
+    } catch (e) {
+      /* attribution is best-effort */
+    }
+    return EMBED_ORIGIN + '/?' + params.join('&');
+  }
 
   function init() {
     var container = document.getElementById('cybersec-challenge');
@@ -27,7 +49,7 @@
     container.style.width = '100%';
 
     var iframe = document.createElement('iframe');
-    iframe.src = EMBED_URL;
+    iframe.src = embedUrl();
     iframe.title = 'Cybersecurity Champions Challenge';
     iframe.setAttribute('loading', 'lazy');
     iframe.setAttribute(

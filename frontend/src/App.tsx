@@ -1,17 +1,23 @@
-/* Main app — state machine across welcome | loading | challenge | result | thanks. */
+/* Main app — state machine across welcome | loading | challenge | result.
+   Funnel: start (/api/start) → completion (/api/complete) → course CTA click
+   (/api/event). The lead form on the result screen is optional and separate. */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Welcome } from './components/Welcome';
 import { Challenge } from './components/Challenge';
 import { Feedback } from './components/Feedback';
 import { Result } from './components/Result';
-import { ThankYou } from './components/ThankYou';
 import { Header, Footer, Confetti } from './components/Chrome';
-import { fetchChallenges, postComplete } from './lib/api';
+import { fetchChallenges, postComplete, postStart } from './lib/api';
+import { getAttribution } from './lib/attribution';
+import { isEmbedded } from './lib/config';
 import { useAutoResize } from './lib/iframe';
 import type { ApiChallenge, AnswerRecord, CompleteResponse } from './lib/types';
 
-type Stage = 'welcome' | 'loading' | 'challenge' | 'submitting' | 'result' | 'thanks' | 'error';
+// Capture attribution on landing, before anything else can touch the URL.
+getAttribution();
+
+type Stage = 'welcome' | 'loading' | 'challenge' | 'submitting' | 'result' | 'error';
 
 export const App = () => {
   const [stage, setStage] = useState<Stage>('welcome');
@@ -28,7 +34,6 @@ export const App = () => {
   const [confettiSeed, setConfettiSeed] = useState(0);
   const [scoreBump, setScoreBump] = useState(0);
   const [completion, setCompletion] = useState<CompleteResponse | null>(null);
-  const [name, setName] = useState('');
   const [startTime, setStartTime] = useState<number>(0);
 
   // Re-fire post-message on every stage / index change.
@@ -42,6 +47,12 @@ export const App = () => {
     setErrorMsg(null);
     try {
       const data = await fetchChallenges('en', 10);
+      postStart({
+        session_id: data.session_id,
+        embedded: isEmbedded,
+        language: 'en',
+        ...getAttribution(),
+      });
       setSessionId(data.session_id);
       setChallenges(data.challenges);
       setIdx(0);
@@ -52,7 +63,6 @@ export const App = () => {
       setAnswerLog([]);
       setFeedback(null);
       setCompletion(null);
-      setName('');
       setStartTime(Date.now());
       setStage('challenge');
     } catch (e) {
@@ -122,11 +132,6 @@ export const App = () => {
     }
   };
 
-  const submitLead = (firstName: string) => {
-    setName(firstName);
-    setStage('thanks');
-  };
-
   const restart = () => {
     setStage('welcome');
     setIdx(0);
@@ -134,7 +139,6 @@ export const App = () => {
     setAnswers([]);
     setStreak(0);
     setMaxStreak(0);
-    setName('');
     setCompletion(null);
   };
 
@@ -175,12 +179,8 @@ export const App = () => {
               onAnswer={handleAnswer}
             />
           )}
-          {stage === 'result' && (
-            <Result total={total} sessionId={sessionId} onSubmit={submitLead} />
-          )}
-          {stage === 'thanks' && completion && (
-            <ThankYou
-              name={name}
+          {stage === 'result' && completion && (
+            <Result
               score={score}
               total={total}
               answers={answers}

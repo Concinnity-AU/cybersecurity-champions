@@ -11,9 +11,29 @@
 <script>
 (function () {
   var EMBED_ORIGIN = 'https://cybersecurity.tims.org.au';
-  var EMBED_URL = EMBED_ORIGIN + '/?embed=1';
   var INITIAL_HEIGHT = 720;
   var MIN_HEIGHT = 400;
+  var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+
+  // The iframe can't see this page's URL, so forward campaign attribution:
+  // this page's UTMs, plus `ref` = the hostname that referred the visitor here.
+  var params = ['embed=1'];
+  try {
+    var here = new URLSearchParams(window.location.search);
+    for (var i = 0; i < UTM_KEYS.length; i++) {
+      var v = here.get(UTM_KEYS[i]);
+      if (v) params.push(UTM_KEYS[i] + '=' + encodeURIComponent(v.slice(0, 120)));
+    }
+    if (document.referrer) {
+      var refHost = new URL(document.referrer).hostname;
+      if (refHost && refHost !== window.location.hostname) {
+        params.push('ref=' + encodeURIComponent(refHost));
+      }
+    }
+  } catch (e) {
+    /* attribution is best-effort */
+  }
+  var EMBED_URL = EMBED_ORIGIN + '/?' + params.join('&');
 
   var container = document.getElementById('cybersec-challenge');
   if (!container) return;

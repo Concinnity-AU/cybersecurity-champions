@@ -42,20 +42,3 @@ export const isEmbedded = (() => {
     return true;
   }
 })();
-
-export function getUtmParams(): {
-  utm_source: string | null;
-  utm_medium: string | null;
-  utm_campaign: string | null;
-} {
-  try {
-    const p = new URLSearchParams(window.location.search);
-    return {
-      utm_source: p.get('utm_source'),
-      utm_medium: p.get('utm_medium'),
-      utm_campaign: p.get('utm_campaign'),
-    };
-  } catch {
-    return { utm_source: null, utm_medium: null, utm_campaign: null };
-  }
-}
